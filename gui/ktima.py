@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import sys
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
+from at.gui.worker import run_thread
+from at.auth.client import AuthStatus
 from at.gui.console import Console
 from at.gui.progress import ProgressBar
 from at.gui.status import StatusButton
@@ -28,6 +30,7 @@ class KtimaUI(QWidget):
                  **kwargs) -> None:
         super().__init__(parent=parent, *args, **kwargs)
         self.setupUi(size)
+        self.threadpool = QThreadPool(parent=self)
 
     def setupUi(self, size):
         self.setObjectName("MainWidget")
@@ -39,19 +42,14 @@ class KtimaUI(QWidget):
         self.tabLayout = QVBoxLayout()
 
         self.console = Console(size=(500, None), parent=self)
-        self.progress = ProgressBar(parent=self)
-        self.status = StatusButton(parent=self)
 
-        self.tabs = QTabWidget()
+        self.tabs = QTabWidget(self)
         self.tabs.setDocumentMode(True)
-        self.tabs.addTab(SettingsTab(size=(600, None), parent=self), "Ρυθμίσεις")
+        self.tabs.addTab(SettingsTab(
+            size=(600, None), parent=self), "Ρυθμίσεις")
         self.tabs.addTab(ListWidget(), "Αρχεία")
 
-        self.tabLayout.addWidget(self.tabs)
-        self.tabLayout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
-        self.tabLayout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
-
-        self.appLayout.addLayout(self.tabLayout)
+        self.appLayout.addWidget(self.tabs)
         self.appLayout.addWidget(self.console)
 
         self.tabs.setCurrentIndex(0)
