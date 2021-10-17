@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List, Union
 from atktima.path import paths
-from at.sql.utils import load_init_queries, load_app_queries
+from at.sql.utils import load_app_queries
 from at.sql.object import QueryObject
 from at.sql.sqlite import SQLiteEngine
 from at.state import State
@@ -19,26 +19,25 @@ class KtimaSQL(SQLiteEngine):
         super().__init__(db=db, app_paths=app_paths)
 
     def load_state(self):
-        settings = QueryObject(app_queries['select_user_settings'],
-                               fetch='singlerow',
-                               cols=True)
+        settings = app_queries['select_user_settings'].attrs(fetch='singlerow',
+                                                             cols=True)
         result = self.select(settings)
 
         return dict(zip(result[0], result[1]))
 
     def save_state(self, state: State):
-        settings = QueryObject(app_queries['update_user_settings'])
-        params = state.get_state(values_only=True)
+        settings = app_queries['update_user_settings']
+        params = state.get(values_only=True)
 
         self.update(settings.set(**params))
 
 
 db = KtimaSQL(db=paths.get_db(), app_paths=paths)
-# s = State.from_db(db)
-# print(s.get_state())
-# print(s['fullname'])
-# print(s['meleti'])
-# s['meleti'] = "KT5-14"
-# s['username'] = 'aznavouridis.k'
-# print(s['meleti'])
-# s.update_db()
+state = State.from_db(db)
+print(state.get())
+print(state['fullname'])
+print(state['meleti'])
+state.set({'meleti': 'KT5-14', 'kthmatemp': 'T:/'})
+# state['meleti'] = "KT5-16"
+# state['username'] = 'aznavouridis.k'
+print(state['meleti'])
