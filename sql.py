@@ -19,11 +19,19 @@ class KtimaSQL(SQLiteEngine):
         super().__init__(db=db, app_paths=app_paths)
 
     def load_state(self):
-        settings = app_queries['select_user_settings'].attrs(fetch='singlerow',
-                                                             cols=True)
-        result = self.select(settings)
+        query = app_queries['select_user_settings'].attrs(fetch='singlerow',
+                                                          cols=True)
+        settings_result = self.select(query)
+        user_settings = dict(zip(settings_result[0], settings_result[1]))
 
-        return dict(zip(result[0], result[1]))
+        query = app_queries['select_meletes'].attrs(fetch='multirow')
+        meletes_result = self.select(query)
+        meletes = dict(meletes_result)
+        all_meletes = {'meletes': meletes.keys()}
+
+        initial_db_state = {**user_settings, **meletes, **all_meletes}
+
+        return initial_db_state
 
     def save_state(self, state: State):
         settings = app_queries['update_user_settings']
