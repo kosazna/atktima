@@ -9,4 +9,4 @@ class KtimaPaths(PathEngine):
         super().__init__(appname=appname)
 
 
-paths = KtimaPaths()
+paths = KtimaPaths(appname=APPNAME)

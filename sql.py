@@ -33,11 +33,3 @@ class KtimaSQL(SQLiteEngine):
 
 
 db = KtimaSQL(db=paths.get_db(), app_paths=paths)
-state = State.from_db(db)
-print(state.get())
-print(state['fullname'])
-print(state['meleti'])
-state.set({'meleti': 'KT5-14', 'kthmatemp': 'T:/'})
-# state['meleti'] = "KT5-16"
-# state['username'] = 'aznavouridis.k'
-print(state['meleti'])
