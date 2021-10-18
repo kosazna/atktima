@@ -15,7 +15,7 @@ class KtimaPaths(PathEngine):
         super().__init__(appname=appname)
 
     @classmethod
-    def set_meleti(cls, meleti: str, kthmadata: str, kthmatemp: str):
+    def set_attrs(cls, meleti: str, kthmadata: str, kthmatemp: str):
         cls.meleti = Path(f"C:/{meleti}")
         cls.kthmadata = Path(kthmadata)
         cls.kthmatemp = Path(kthmatemp)
@@ -27,6 +27,13 @@ class KtimaPaths(PathEngine):
 
     def get_localdata(self, obj: bool = False):
         _path = self.meleti.joinpath("!OutputData/LocalData")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
+    def get_paradosidata(self, obj: bool = False):
+        _path = self.meleti.joinpath("!OutputData/ParadosiData")
 
         if obj:
             return _path

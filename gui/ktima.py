@@ -24,7 +24,7 @@ from atktima.state import state
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
 log.set_mode("GUI")
-paths.set_meleti(state['meleti'], state['kthmadata'], state['kthmatemp'])
+paths.set_attrs(state['meleti'], state['kthmadata'], state['kthmatemp'])
 
 
 class KtimaUI(QWidget):

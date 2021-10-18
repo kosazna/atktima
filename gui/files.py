@@ -54,12 +54,16 @@ class FilesTab(QWidget):
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
         self.serverLoad.clicked.connect(self.onGetFromServer)
+        self.serverCombo.subscribe(self.serverStructure.setText)
+        self.localCombo.subscribe(self.localStructure.setText)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
 
         layout = QVBoxLayout()
         labelLayout = QHBoxLayout()
+        serverStruct = QHBoxLayout()
+        localStruct = QHBoxLayout()
         listLayout = QHBoxLayout()
         buttonLayout = QHBoxLayout()
 
@@ -98,18 +102,39 @@ class FilesTab(QWidget):
                                 color='blue',
                                 size=(180, 30),
                                 parent=self)
-        self.structure = StrInput(label="Δομή server",
-                                  completer=['<ota>/SHP/',
-                                             '<ota>/SHP/<shape>/'],
-                                  editsize=(200, 24),
-                                  parent=self)
+
+        self.serverCombo = ComboInput(label="Δομή Server",
+                                      labelsize=(80, 24),
+                                      items=['<ota>/SHP',
+                                             '<ota>/SHP/<shape>'],
+                                      combosize=(200, 24),
+                                      parent=self)
+        self.localCombo = ComboInput(label="Δομή Τοπικά",
+                                     labelsize=(80, 24),
+                                     items=['<ota>/SHAPE/<shape>',
+                                            '<ota>/<shape>'],
+                                     combosize=(200, 24),
+                                     parent=self)
+        self.serverStructure = StrInput(completer=['<ota>/SHP',
+                                                   '<ota>/SHP/<shape>'],
+                                        editsize=(220, 24),
+                                        parent=self)
+        self.localStructure = StrInput(completer=['<ota>/SHAPE/<shape>',
+                                                  '<ota>/<shape>'],
+                                       editsize=(220, 24),
+                                       parent=self)
 
         self.progress = ProgressBar(parent=self)
 
         if state['company'] == 'NAMA':
-            self.structure.setText('<ota>/SHP/')
+            self.serverCombo.setCurrentText('<ota>/SHP')
+            self.serverStructure.setText('<ota>/SHP')
         else:
-            self.structure.setText('<ota>/SHP/<shape>/')
+            self.serverCombo.setCurrentText('<ota>/SHP/<shape>')
+            self.serverStructure.setText('<ota>/SHP/<shape>')
+
+        self.localCombo.setCurrentText('<ota>/<shape>')
+        self.localStructure.setText('<ota>/<shape>')
 
         self.checkServer()
         self.shape.addItems(db.get_shapes(state['meleti']))
@@ -127,7 +152,18 @@ class FilesTab(QWidget):
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
         layout.addWidget(self.info)
-        layout.addWidget(self.structure, alignment=Qt.AlignLeft)
+        serverStruct.addWidget(self.serverCombo)
+        serverStruct.addWidget(self.serverStructure,
+                               stretch=2,
+                               alignment=Qt.AlignLeft)
+        localStruct.addWidget(self.localCombo)
+        localStruct.addWidget(self.localStructure,
+                              stretch=2,
+                              alignment=Qt.AlignLeft)
+
+        layout.addLayout(serverStruct)
+        layout.addLayout(localStruct)
+        layout.addWidget(HLine())
         listLayout.addWidget(self.shape)
         listLayout.addWidget(self.otas)
         layout.addLayout(listLayout)
@@ -187,24 +223,37 @@ class FilesTab(QWidget):
 
     def getFilesFromServer(self, _progress):
         server = paths.get_kthmadata(True)
-        structure = self.structure.getText()
+        local = paths.get_localdata(True)
+        server_structure = self.serverStructure.getText()
+        local_structure = self.localStructure.getText()
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
 
         _progress.emit({'pbar_max': len(user_otas)})
 
-        counter = 0
+        ota_counter = 0
+        file_counter = 0
 
         for ota in user_otas:
-            counter += 1
+            ota_counter += 1
             for shape in user_shapes:
                 if shape == 'VSTEAS_REL':
                     pass
                 else:
-                    sub = replace_all(structure, {'shape': shape, 'ota': ota})
-                    filepath = server.joinpath(f"{sub}{shape}.shp")
-                    log.info(str(filepath))
-                    _progress.emit({'pbar': counter})
+                    sub_server = replace_all(server_structure,
+                                             {'shape': shape, 'ota': ota})
+                    sub_local = replace_all(local_structure,
+                                            {'shape': shape, 'ota': ota})
+                    _src = server.joinpath(f"{sub_server}/{shape}.shp")
+                    _dst = local.joinpath(f"{sub_local}/{shape}.shp")
+
+                    copied = copy_file(_src, _dst)
+                    if copied:
+                        file_counter += 1
+            _progress.emit({'pbar': ota_counter})
+
+        return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
+                              details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
 
 
 if __name__ == '__main__':

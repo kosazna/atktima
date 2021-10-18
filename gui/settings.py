@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from os import path
 import sys
 from pathlib import Path
 from time import sleep
@@ -56,7 +57,6 @@ class SettingsTab(QWidget):
         self.meletes.subscribe(self.onMeletiChanged)
         self.kthmadata.lineEdit.textChanged.connect(self.settingsChanged)
         self.kthmatemp.lineEdit.textChanged.connect(self.settingsChanged)
-        
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -231,6 +231,8 @@ class SettingsTab(QWidget):
         state['meleti'] = self.pickedMeleti
         state['kthmatemp'] = self.kthmatemp.getText()
         state['kthmadata'] = self.kthmadata.getText()
+
+        paths.set_attrs(state['meleti'], state['kthmadata'], state['kthmatemp'])
 
         state.update_db()
         self.save.disable()
