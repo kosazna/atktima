@@ -19,17 +19,11 @@ class KtimaSQL(SQLiteEngine):
         super().__init__(db=db, app_paths=app_paths)
 
     def load_state(self):
-        query = app_queries['select_user_settings'].attrs(fetch='singlerow',
-                                                          cols=True)
-        settings_result = self.select(query)
-        user_settings = dict(zip(settings_result[0], settings_result[1]))
+        user_settings = self.get_user_settings()
+        meletes = self.get_meleti_ota_info()
+        all_mel_codes = {'all_mel_codes': meletes.keys()}
 
-        query = app_queries['select_meletes'].attrs(fetch='multirow')
-        meletes_result = self.select(query)
-        meletes = dict(meletes_result)
-        all_meletes = {'meletes': meletes.keys()}
-
-        initial_db_state = {**user_settings, **meletes, **all_meletes}
+        initial_db_state = {**user_settings, **meletes, **all_mel_codes}
 
         return initial_db_state
 
@@ -39,5 +33,40 @@ class KtimaSQL(SQLiteEngine):
 
         self.update(settings.set(**params))
 
+    def get_user_settings(self) -> dict:
+        query = app_queries['select_user_settings'].attrs(fetch='singlerow',
+                                                          cols=True)
+        result = self.select(query)
+        user_settings = dict(zip(result[0], result[1]))
+
+        return user_settings
+
+    def get_meleti_ota_info(self):
+        meletes = {}
+        query = app_queries['select_meletes'].attrs(fetch='multirow')
+        meleti_code_name = db.select(query)
+
+        query = app_queries['select_all_companies'].attrs(fetch='singlecol')
+        companies = db.select(query)
+
+        for meleti_code, meleti_name in meleti_code_name:
+            meletes[meleti_code] = {'name': meleti_name, 'company': {}}
+            for company in companies:
+                query = app_queries['select_ota_from_meleti_company'].attrs(
+                    fetch='singlecol').set(meleti=meleti_code, company=company)
+                meleti_company_ota = db.select(query)
+
+                if meleti_company_ota:
+                    meletes[meleti_code]['company'][company] = meleti_company_ota
+
+        return meletes
+
 
 db = KtimaSQL(db=paths.get_db(), app_paths=paths)
+
+# print(db.select(app_queries['select_meletes'].attrs(fetch='multirow')))
+# print(db.select(app_queries['select_all_companies'].attrs(fetch='singlecol')))
+# print(db.select(app_queries['select_ota_from_meleti_company'].attrs(
+#     fetch='singlecol').set(meleti="KT2-11", company="NAMA")))
+
+# print(db.get_user_settings())

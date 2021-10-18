@@ -5,7 +5,6 @@ from time import sleep
 from typing import Any, Tuple, Union
 
 from at.auth.utils import load_lic
-from PyQt5 import QtWidgets
 from at.gui.line import HLine
 from at.auth.client import Authorize, AuthStatus, licensed
 from at.gui.button import Button
@@ -26,7 +25,7 @@ from at.gui.worker import run_thread
 from at.io.copyfuncs import batch_copy_file, copy_file
 from at.logger import log
 from at.path import PathEngine
-from PyQt5.QtCore import Qt, QThreadPool
+from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 
@@ -38,6 +37,8 @@ from atktima.state import state
 
 
 class SettingsTab(QWidget):
+    meletiChanged = pyqtSignal()
+
     def __init__(self,
                  size: Tuple[Optional[int]] = (None, None),
                  parent: Optional[QWidget] = None,
@@ -71,7 +72,7 @@ class SettingsTab(QWidget):
                              label=state['company'],
                              parent=self)
         self.meleti = Label(icon='info-circle-fill',
-                            label=state[state['meleti']],
+                            label=state[state['meleti']]['name'],
                             parent=self)
         self.app = Label(icon='app',
                          label=state['appname'],
@@ -87,7 +88,7 @@ class SettingsTab(QWidget):
                                      parent=self)
         self.meletes = ComboInput(label="Μελέτη",
                                   combosize=(100, 24),
-                                  items=state['meletes'],
+                                  items=state['all_mel_codes'],
                                   parent=self)
         self.lic = FileInput(label="Άδεια",
                              parent=self)
@@ -149,12 +150,6 @@ class SettingsTab(QWidget):
     def updateFinish(self):
         pass
 
-    def onMeletiChanged(self):
-        self.pickedMeleti = self.meletes.getCurrentText()
-        self.meleti.setText(state[self.pickedMeleti])
-
-        self.settingsChanged()
-
     def settingsChanged(self):
         mel_changed = self.pickedMeleti != state['meleti']
         data_changed = self.kthmadata.getText() != state['kthmadata']
@@ -163,6 +158,13 @@ class SettingsTab(QWidget):
             self.save.enable()
         else:
             self.save.disable()
+
+    def onMeletiChanged(self):
+        self.pickedMeleti = self.meletes.getCurrentText()
+        self.meleti.setText(state[self.pickedMeleti]['name'])
+
+        self.settingsChanged()
+        self.status.disable()
 
     def onSave(self):
         run_thread(threadpool=self.threadpool,
@@ -190,6 +192,7 @@ class SettingsTab(QWidget):
 
         state.update_db()
         _progress.emit({'status': "Οι ρυθμίσεις αποθηκεύτηκαν"})
+        self.meletiChanged.emit()
 
 
 if __name__ == '__main__':

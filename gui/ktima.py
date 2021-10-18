@@ -11,12 +11,15 @@ from at.gui.list import ListWidget
 from at.logger import log
 from at.gui.utils import set_size
 from atktima.path import paths
-from PyQt5.QtCore import Qt, QThreadPool
+from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,
                              QVBoxLayout, QWidget)
 
 from atktima.gui.settings import SettingsTab
+from atktima.gui.files import FilesTab
+
+from atktima.state import state
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
 log.set_mode("GUI")
@@ -31,6 +34,7 @@ class KtimaUI(QWidget):
         super().__init__(parent=parent, *args, **kwargs)
         self.setupUi(size)
         self.threadpool = QThreadPool(parent=self)
+        self.settingsTab.meletiChanged.connect(self.onMeletiUpdate)
 
     def setupUi(self, size):
         self.setObjectName("MainWidget")
@@ -39,15 +43,17 @@ class KtimaUI(QWidget):
         set_size(widget=self, size=size)
 
         self.appLayout = QHBoxLayout()
-        self.tabLayout = QVBoxLayout()
+        # self.tabLayout = QVBoxLayout()
 
         self.console = Console(size=(500, None), parent=self)
 
         self.tabs = QTabWidget(self)
         self.tabs.setDocumentMode(True)
-        self.tabs.addTab(SettingsTab(
-            size=(600, None), parent=self), "Ρυθμίσεις")
-        self.tabs.addTab(ListWidget(), "Αρχεία")
+
+        self.settingsTab = SettingsTab(size=(600, None), parent=self)
+        self.tabs.addTab(self.settingsTab, "Ρυθμίσεις")
+        self.filesTab = FilesTab(size=(600, None), parent=self)
+        self.tabs.addTab(self.filesTab, "Αρχεία")
 
         self.appLayout.addWidget(self.tabs)
         self.appLayout.addWidget(self.console)
@@ -55,6 +61,10 @@ class KtimaUI(QWidget):
         self.tabs.setCurrentIndex(0)
 
         self.setLayout(self.appLayout)
+
+    @pyqtSlot()
+    def onMeletiUpdate(self):
+        self.filesTab.meleti.setText(state['meleti'])
 
 
 if __name__ == '__main__':
