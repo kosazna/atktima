@@ -35,24 +35,26 @@ class KtimaUI(QWidget):
         self.setupUi(size)
         self.threadpool = QThreadPool(parent=self)
         self.settingsTab.meletiChanged.connect(self.onMeletiUpdate)
+        self.settingsTab.serverStatusChanged.connect(self.onServerStatusChanged)
 
     def setupUi(self, size):
         self.setObjectName("MainWidget")
         self.setStyleSheet(cssGuide)
+        self.setWindowTitle(f"{state['appname']} - {state['version']}")
 
         set_size(widget=self, size=size)
 
         self.appLayout = QHBoxLayout()
         # self.tabLayout = QVBoxLayout()
 
-        self.console = Console(size=(500, None), parent=self)
+        self.console = Console(size=(450, None), parent=self)
 
         self.tabs = QTabWidget(self)
         self.tabs.setDocumentMode(True)
 
-        self.settingsTab = SettingsTab(size=(600, None), parent=self)
+        self.settingsTab = SettingsTab(size=(650, None), parent=self)
         self.tabs.addTab(self.settingsTab, "Ρυθμίσεις")
-        self.filesTab = FilesTab(size=(600, None), parent=self)
+        self.filesTab = FilesTab(size=(650, None), parent=self)
         self.tabs.addTab(self.filesTab, "Αρχεία")
 
         self.appLayout.addWidget(self.tabs)
@@ -64,7 +66,14 @@ class KtimaUI(QWidget):
 
     @pyqtSlot()
     def onMeletiUpdate(self):
+        meleti_otas = state[state['meleti']]['company'][state['company']]
         self.filesTab.meleti.setText(state['meleti'])
+        self.filesTab.otas.clearContent()
+        self.filesTab.otas.addItems(meleti_otas)
+
+    @pyqtSlot(tuple)
+    def onServerStatusChanged(self, status):
+        self.filesTab.server.changeStatus(*status)
 
 
 if __name__ == '__main__':

@@ -38,6 +38,7 @@ from atktima.state import state
 
 class SettingsTab(QWidget):
     meletiChanged = pyqtSignal()
+    serverStatusChanged = pyqtSignal(tuple)
 
     def __init__(self,
                  size: Tuple[Optional[int]] = (None, None),
@@ -60,6 +61,8 @@ class SettingsTab(QWidget):
         layout = QVBoxLayout()
         labelLayout = QHBoxLayout()
         meletiLayout = QHBoxLayout()
+        datalayout = QHBoxLayout()
+        templayout = QHBoxLayout()
         licLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
@@ -83,9 +86,15 @@ class SettingsTab(QWidget):
         self.kthmatemp = FolderInput(label='kthmatemp',
                                      editsize=(100, 24),
                                      parent=self)
+        self.kthmatempStatus = StatusLabel(icon='hdd-network-fill',
+                                           statussize=(110, 24),
+                                           parent=self)
         self.kthmadata = FolderInput(label='kthmadata',
                                      editsize=(100, 24),
                                      parent=self)
+        self.kthmadataStatus = StatusLabel(icon='hdd-network-fill',
+                                           statussize=(110, 24),
+                                           parent=self)
         self.meletes = ComboInput(label="Μελέτη",
                                   combosize=(100, 24),
                                   items=state['all_mel_codes'],
@@ -104,6 +113,7 @@ class SettingsTab(QWidget):
         self.kthmatemp.setText(state['kthmatemp'])
         self.kthmadata.setText(state['kthmadata'])
         self.save.disable()
+        self.checkServer()
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -115,8 +125,16 @@ class SettingsTab(QWidget):
         meletiLayout.addWidget(self.meletes)
         meletiLayout.addWidget(self.meleti, stretch=2, alignment=Qt.AlignLeft)
         layout.addLayout(meletiLayout)
-        layout.addWidget(self.kthmatemp, alignment=(Qt.AlignLeft | Qt.AlignTop))
-        layout.addWidget(self.kthmadata, alignment=(Qt.AlignLeft | Qt.AlignTop))
+        templayout.addWidget(self.kthmatemp)
+        templayout.addWidget(self.kthmatempStatus,
+                             stretch=2, alignment=Qt.AlignLeft)
+        datalayout.addWidget(self.kthmadata)
+        datalayout.addWidget(self.kthmadataStatus,
+                             stretch=2, alignment=Qt.AlignLeft)
+        # layout.addWidget(self.kthmatemp, alignment=(Qt.AlignLeft | Qt.AlignTop))
+        # layout.addWidget(self.kthmadata, alignment=(Qt.AlignLeft | Qt.AlignTop))
+        layout.addLayout(templayout)
+        layout.addLayout(datalayout)
         layout.addWidget(self.save, alignment=Qt.AlignRight)
         layout.addWidget(HLine())
         licLayout.addWidget(self.lic)
@@ -150,12 +168,29 @@ class SettingsTab(QWidget):
     def updateFinish(self):
         pass
 
+    def checkServer(self):
+        if Path(self.kthmatemp.getText()).exists():
+            self.kthmatempStatus.changeStatus("Προσβάσιμο", 'statusOk')
+            state['kthmatemp_status'] = "Προσβάσιμο"
+        else:
+            self.kthmatempStatus.changeStatus("Μη Προσβάσιμο", 'statusError')
+            state['kthmatemp_status'] = "Μη Προσβάσιμο"
+        if Path(self.kthmadata.getText()).exists():
+            self.kthmadataStatus.changeStatus("Προσβάσιμο", 'statusOk')
+            state['kthmadata_status'] = "Προσβάσιμο"
+            self.serverStatusChanged.emit(("Προσβάσιμο", 'statusOk'))
+        else:
+            self.kthmadataStatus.changeStatus("Μη Προσβάσιμο", 'statusError')
+            state['kthmadata_status'] = "Μη Προσβάσιμο"
+            self.serverStatusChanged.emit(("Μη Προσβάσιμο", 'statusError'))
+
     def settingsChanged(self):
         mel_changed = self.pickedMeleti != state['meleti']
         data_changed = self.kthmadata.getText() != state['kthmadata']
         temp_changed = self.kthmatemp.getText() != state['kthmatemp']
         if data_changed or temp_changed or mel_changed:
             self.save.enable()
+            self.checkServer()
         else:
             self.save.disable()
 
@@ -192,6 +227,7 @@ class SettingsTab(QWidget):
 
         state.update_db()
         _progress.emit({'status': "Οι ρυθμίσεις αποθηκεύτηκαν"})
+        self.save.disable()
         self.meletiChanged.emit()
 
 
