@@ -24,6 +24,7 @@ from at.gui.utils import *
 from at.gui.worker import run_thread
 from at.io.copyfuncs import batch_copy_file, copy_file
 from at.logger import log
+from at.result import Result
 from at.path import PathEngine
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -49,11 +50,13 @@ class SettingsTab(QWidget):
         self.setupUi(size)
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
+        self.popup = Popup(state['appname'])
         self.save.subscribe(self.onSave)
         self.licButton.subscribe(self.onLicUpload)
         self.meletes.subscribe(self.onMeletiChanged)
         self.kthmadata.lineEdit.textChanged.connect(self.settingsChanged)
         self.kthmatemp.lineEdit.textChanged.connect(self.settingsChanged)
+        
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -74,7 +77,7 @@ class SettingsTab(QWidget):
         self.company = Label(icon='house-fill',
                              label=state['company'],
                              parent=self)
-        self.meleti = Label(icon='info-circle-fill',
+        self.meleti = Label(icon='info-square-fill',
                             label=state[state['meleti']]['name'],
                             parent=self)
         self.app = Label(icon='app',
@@ -131,8 +134,6 @@ class SettingsTab(QWidget):
         datalayout.addWidget(self.kthmadata)
         datalayout.addWidget(self.kthmadataStatus,
                              stretch=2, alignment=Qt.AlignLeft)
-        # layout.addWidget(self.kthmatemp, alignment=(Qt.AlignLeft | Qt.AlignTop))
-        # layout.addWidget(self.kthmadata, alignment=(Qt.AlignLeft | Qt.AlignTop))
         layout.addLayout(templayout)
         layout.addLayout(datalayout)
         layout.addWidget(self.save, alignment=Qt.AlignRight)
@@ -153,7 +154,7 @@ class SettingsTab(QWidget):
             if progress_now is not None:
                 self.progress.setValue(progress_now)
             if progress_max is not None:
-                self.progress.setValue(progress_max)
+                self.progress.setMaximum(progress_max)
             if status is not None:
                 self.status.disable(str(status))
 
@@ -161,9 +162,16 @@ class SettingsTab(QWidget):
         if status is not None:
             if isinstance(status, AuthStatus):
                 if not status.authorised:
-                    self.pop.error(status.info)
-            elif isinstance(status, str):
-                self.status.enable(status)
+                    self.popup.error(status.info)
+            elif isinstance(status, Result):
+                if status.result == Result.ERROR:
+                    self.popup.error(status.info)
+                elif status.result == Result.WARNING:
+                    self.popup.warning(status.info, **status.details)
+                else:
+                    self.popup.info(status.info, **status.details)
+            else:
+                self.status.disable(status)
 
     def updateFinish(self):
         pass
@@ -217,8 +225,7 @@ class SettingsTab(QWidget):
 
     def licUploadAction(self, _progress):
         src = self.lic.getText()
-        load_lic(filepath=src, dst=paths.get_authfolder())
-        _progress.emit({'status': "Η προσωρινή άδεια φορτώθηκε επιτυχώς"})
+        return load_lic(filepath=src, dst=paths.get_authfolder())
 
     def saveAction(self, _progress):
         state['meleti'] = self.pickedMeleti
@@ -226,9 +233,10 @@ class SettingsTab(QWidget):
         state['kthmadata'] = self.kthmadata.getText()
 
         state.update_db()
-        _progress.emit({'status': "Οι ρυθμίσεις αποθηκεύτηκαν"})
         self.save.disable()
         self.meletiChanged.emit()
+
+        return Result.success("Οι ρυθμίσεις αποθηκεύτηκαν")
 
 
 if __name__ == '__main__':

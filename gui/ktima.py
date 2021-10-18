@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 from typing import Any, Optional, Tuple
+from at.gui.popup import Popup
 
 from at.gui.worker import run_thread
 from at.auth.client import AuthStatus
@@ -23,6 +24,7 @@ from atktima.state import state
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
 log.set_mode("GUI")
+paths.set_meleti(state['meleti'], state['kthmadata'], state['kthmatemp'])
 
 
 class KtimaUI(QWidget):
@@ -70,6 +72,7 @@ class KtimaUI(QWidget):
         self.filesTab.meleti.setText(state['meleti'])
         self.filesTab.otas.clearContent()
         self.filesTab.otas.addItems(meleti_otas)
+        self.filesTab.otas.toggle()
 
     @pyqtSlot(tuple)
     def onServerStatusChanged(self, status):
