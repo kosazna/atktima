@@ -36,7 +36,7 @@ class KtimaUI(QWidget):
         super().__init__(parent=parent, *args, **kwargs)
         self.setupUi(size)
         self.threadpool = QThreadPool(parent=self)
-        self.settingsTab.meletiChanged.connect(self.onMeletiUpdate)
+        self.settingsTab.settingsChanged.connect(self.onSettingsUpdate)
         self.settingsTab.serverStatusChanged.connect(self.onServerStatusChanged)
 
     def setupUi(self, size):
@@ -67,12 +67,16 @@ class KtimaUI(QWidget):
         self.setLayout(self.appLayout)
 
     @pyqtSlot()
-    def onMeletiUpdate(self):
-        meleti_otas = state[state['meleti']]['company'][state['company']]
+    def onSettingsUpdate(self):
+        meleti_otas = state[state['meleti']]['company']['NAMA']
         self.filesTab.meleti.setText(state['meleti'])
+        self.filesTab.fullname.setText(state['fullname'])
+        self.filesTab.company.setText(state['company'])
         self.filesTab.otas.clearContent()
         self.filesTab.otas.addItems(meleti_otas)
         self.filesTab.otas.toggle()
+        self.filesTab.companyOtaCombo.clearItems()
+        self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
 
     @pyqtSlot(tuple)
     def onServerStatusChanged(self, status):

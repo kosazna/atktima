@@ -56,6 +56,7 @@ class FilesTab(QWidget):
         self.serverLoad.clicked.connect(self.onGetFromServer)
         self.serverCombo.subscribe(self.serverStructure.setText)
         self.localCombo.subscribe(self.localStructure.setText)
+        self.otas.assignLoadFunc(self.loadOtas)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -115,6 +116,11 @@ class FilesTab(QWidget):
                                             '<ota>/<shape>'],
                                      combosize=(200, 24),
                                      parent=self)
+        self.companyOtaCombo = ComboInput(label="ΟΤΑ για εταιρία",
+                                     labelsize=(100, 24),
+                                     items=state[state['meleti']]['company'].keys(),
+                                     combosize=(100, 24),
+                                     parent=self)
         self.serverStructure = StrInput(completer=['<ota>/SHP',
                                                    '<ota>/SHP/<shape>'],
                                         editsize=(220, 24),
@@ -135,14 +141,12 @@ class FilesTab(QWidget):
 
         self.localCombo.setCurrentText('<ota>/<shape>')
         self.localStructure.setText('<ota>/<shape>')
+        self.companyOtaCombo.setCurrentText(state['company'])
 
         self.checkServer()
         self.shape.addItems(db.get_shapes(state['meleti']))
-        self.otas.addItems(state[state['meleti']]['company'][state['company']])
+        self.otas.addItems(state[state['meleti']]['company']['NAMA'])
         self.shape.hideButtons()
-        self.otas.hideButtons()
-        self.shape.toggle()
-        self.otas.toggle()
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -164,6 +168,7 @@ class FilesTab(QWidget):
         layout.addLayout(serverStruct)
         layout.addLayout(localStruct)
         layout.addWidget(HLine())
+        layout.addWidget(self.companyOtaCombo, alignment=Qt.AlignRight)
         listLayout.addWidget(self.shape)
         listLayout.addWidget(self.otas)
         layout.addLayout(listLayout)
@@ -214,6 +219,10 @@ class FilesTab(QWidget):
     def updateFinish(self):
         pass
 
+    def loadOtas(self):
+        company = self.companyOtaCombo.getCurrentText()
+        return state[state['meleti']]['company'][company]
+
     def onGetFromServer(self):
         run_thread(threadpool=self.threadpool,
                    function=self.getFilesFromServer,
@@ -234,26 +243,29 @@ class FilesTab(QWidget):
         ota_counter = 0
         file_counter = 0
 
-        for ota in user_otas:
-            ota_counter += 1
-            for shape in user_shapes:
-                if shape == 'VSTEAS_REL':
-                    pass
-                else:
-                    sub_server = replace_all(server_structure,
-                                             {'shape': shape, 'ota': ota})
-                    sub_local = replace_all(local_structure,
-                                            {'shape': shape, 'ota': ota})
-                    _src = server.joinpath(f"{sub_server}/{shape}.shp")
-                    _dst = local.joinpath(f"{sub_local}/{shape}.shp")
+        if user_otas and user_shapes:
+            for ota in user_otas:
+                ota_counter += 1
+                for shape in user_shapes:
+                    if shape == 'VSTEAS_REL':
+                        pass
+                    else:
+                        sub_server = replace_all(server_structure,
+                                                {'shape': shape, 'ota': ota})
+                        sub_local = replace_all(local_structure,
+                                                {'shape': shape, 'ota': ota})
+                        _src = server.joinpath(f"{sub_server}/{shape}.shp")
+                        _dst = local.joinpath(f"{sub_local}/{shape}.shp")
 
-                    copied = copy_file(_src, _dst)
-                    if copied:
-                        file_counter += 1
-            _progress.emit({'pbar': ota_counter})
+                        copied = copy_file(_src, _dst)
+                        if copied:
+                            file_counter += 1
+                _progress.emit({'pbar': ota_counter})
 
-        return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
-                              details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
+            return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
+                                details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
+        else:
+            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
 
 
 if __name__ == '__main__':

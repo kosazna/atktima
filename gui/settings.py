@@ -33,13 +33,14 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 
 from atktima.path import paths
 from atktima.state import state
+from atktima.sql import db
 
 # When setting fixed width to QLineEdit ->
 # -> add alignment=Qt.AlignLeft when adding widget to layout
 
 
 class SettingsTab(QWidget):
-    meletiChanged = pyqtSignal()
+    settingsChanged = pyqtSignal()
     serverStatusChanged = pyqtSignal(tuple)
 
     def __init__(self,
@@ -52,11 +53,15 @@ class SettingsTab(QWidget):
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
-        self.save.subscribe(self.onSave)
+        self.saveButton.subscribe(self.onSave)
+        self.dbButton.subscribe(lambda: db.open_db(paths.get_db_exe()))
         self.licButton.subscribe(self.onLicUpload)
         self.meletes.subscribe(self.onMeletiChanged)
-        self.kthmadata.lineEdit.textChanged.connect(self.settingsChanged)
-        self.kthmatemp.lineEdit.textChanged.connect(self.settingsChanged)
+        self.kthmadata.lineEdit.textChanged.connect(self.areSettingsChanged)
+        self.kthmatemp.lineEdit.textChanged.connect(self.areSettingsChanged)
+        self.fullnameInsert.lineEdit.textChanged.connect(
+            self.areSettingsChanged)
+        self.companyInsert.lineEdit.textChanged.connect(self.areSettingsChanged)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -65,6 +70,7 @@ class SettingsTab(QWidget):
         labelLayout = QHBoxLayout()
         meletiLayout = QHBoxLayout()
         datalayout = QHBoxLayout()
+        buttonLayout = QHBoxLayout()
         templayout = QHBoxLayout()
         licLayout = QHBoxLayout()
 
@@ -86,6 +92,13 @@ class SettingsTab(QWidget):
         self.version = Label(icon='hash',
                              label=state['version'],
                              parent=self)
+
+        self.fullnameInsert = StrInput(label="'Ονομα",
+                                       editsize=(250, 24),
+                                       parent=self)
+        self.companyInsert = StrInput(label="Εταιρία",
+                                      editsize=(250, 24),
+                                      parent=self)
         self.kthmatemp = FolderInput(label='kthmatemp',
                                      editsize=(100, 24),
                                      parent=self)
@@ -107,15 +120,21 @@ class SettingsTab(QWidget):
         self.licButton = Button(label="Φόρτωση",
                                 icon='upload',
                                 size=(90, 22))
-        self.save = Button("Αποθήκευση Αλλαγών",
-                           size=(140, 26),
-                           parent=self)
+        self.saveButton = Button(label="Αποθήκευση Αλλαγών",
+                                 size=(140, 26),
+                                 parent=self)
+        self.dbButton = Button(label="Άνοιγμα Βάσης",
+                               icon='server',
+                               size=(120, 26),
+                               parent=self)
         self.status = StatusButton(parent=self)
 
         self.meletes.setCurrentText(state['meleti'])
         self.kthmatemp.setText(state['kthmatemp'])
         self.kthmadata.setText(state['kthmadata'])
-        self.save.disable()
+        self.fullnameInsert.setText(state['fullname'])
+        self.companyInsert.setText(state['company'])
+        self.saveButton.disable()
         self.checkServer()
 
         labelLayout.addWidget(self.fullname)
@@ -125,6 +144,8 @@ class SettingsTab(QWidget):
         labelLayout.addWidget(self.version)
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
+        layout.addWidget(self.fullnameInsert, alignment=Qt.AlignLeft)
+        layout.addWidget(self.companyInsert, alignment=Qt.AlignLeft)
         meletiLayout.addWidget(self.meletes)
         meletiLayout.addWidget(self.meleti, stretch=2, alignment=Qt.AlignLeft)
         layout.addLayout(meletiLayout)
@@ -136,7 +157,10 @@ class SettingsTab(QWidget):
                              stretch=2, alignment=Qt.AlignLeft)
         layout.addLayout(templayout)
         layout.addLayout(datalayout)
-        layout.addWidget(self.save, alignment=Qt.AlignRight)
+
+        buttonLayout.addWidget(self.saveButton, alignment=Qt.AlignRight)
+        buttonLayout.addWidget(self.dbButton)
+        layout.addLayout(buttonLayout)
         layout.addWidget(HLine())
         licLayout.addWidget(self.lic)
         licLayout.addWidget(self.licButton)
@@ -192,21 +216,23 @@ class SettingsTab(QWidget):
             state['kthmadata_status'] = "Μη Προσβάσιμο"
             self.serverStatusChanged.emit(("Μη Προσβάσιμο", 'statusError'))
 
-    def settingsChanged(self):
+    def areSettingsChanged(self):
         mel_changed = self.pickedMeleti != state['meleti']
         data_changed = self.kthmadata.getText() != state['kthmadata']
         temp_changed = self.kthmatemp.getText() != state['kthmatemp']
-        if data_changed or temp_changed or mel_changed:
-            self.save.enable()
+        fullname_changed = self.fullnameInsert.getText() != state['fullname']
+        company_changed = self.companyInsert.getText() != state['company']
+        if data_changed or temp_changed or mel_changed or fullname_changed or company_changed:
+            self.saveButton.enable()
             self.checkServer()
         else:
-            self.save.disable()
+            self.saveButton.disable()
 
     def onMeletiChanged(self):
         self.pickedMeleti = self.meletes.getCurrentText()
         self.meleti.setText(state[self.pickedMeleti]['name'])
 
-        self.settingsChanged()
+        self.areSettingsChanged()
         self.status.disable()
 
     def onSave(self):
@@ -231,12 +257,14 @@ class SettingsTab(QWidget):
         state['meleti'] = self.pickedMeleti
         state['kthmatemp'] = self.kthmatemp.getText()
         state['kthmadata'] = self.kthmadata.getText()
+        state['company'] = self.companyInsert.getText()
+        state['fullname'] = self.fullnameInsert.getText()
 
         paths.set_attrs(state['meleti'], state['kthmadata'], state['kthmatemp'])
 
         state.update_db()
-        self.save.disable()
-        self.meletiChanged.emit()
+        self.saveButton.disable()
+        self.settingsChanged.emit()
 
         return Result.success("Οι ρυθμίσεις αποθηκεύτηκαν")
 
