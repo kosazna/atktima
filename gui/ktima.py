@@ -57,7 +57,7 @@ class KtimaUI(QWidget):
         self.settingsTab = SettingsTab(size=(650, None), parent=self)
         self.tabs.addTab(self.settingsTab, "Ρυθμίσεις")
         self.filesTab = FilesTab(size=(650, None), parent=self)
-        self.tabs.addTab(self.filesTab, "Αρχεία")
+        self.tabs.addTab(self.filesTab, "Ενημέρωση Αρχείων")
 
         self.appLayout.addWidget(self.tabs)
         self.appLayout.addWidget(self.console)

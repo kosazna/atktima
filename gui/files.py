@@ -35,6 +35,7 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 from atktima.path import paths
 from atktima.state import state
 from atktima.sql import db
+from atktima.auth import auth, licensed
 
 # When setting fixed width to QLineEdit ->
 # -> add alignment=Qt.AlignLeft when adding widget to layout
@@ -50,9 +51,11 @@ class FilesTab(QWidget):
                  **kwargs) -> None:
         super().__init__(parent=parent, *args, **kwargs)
         self.setupUi(size)
+
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
+
         self.serverLoad.clicked.connect(self.onGetFromServer)
         self.serverCombo.subscribe(self.serverStructure.setText)
         self.localCombo.subscribe(self.localStructure.setText)
@@ -94,15 +97,10 @@ class FilesTab(QWidget):
         self.otas = ListWidget(label="Επιλογή ΟΤΑ",
                                parent=self)
 
-        self.serverLoad = Button("Server -> LocalData",
+        self.serverLoad = Button("Φόρτωση απο Server",
                                  color='blue',
                                  size=(180, 30),
                                  parent=self)
-
-        self.localLoad = Button("LocalData -> ParadosiData",
-                                color='blue',
-                                size=(180, 30),
-                                parent=self)
 
         self.serverCombo = ComboInput(label="Δομή Server",
                                       labelsize=(80, 24),
@@ -174,7 +172,6 @@ class FilesTab(QWidget):
         layout.addLayout(listLayout)
         layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
         buttonLayout.addWidget(self.serverLoad)
-        buttonLayout.addWidget(self.localLoad)
         layout.addLayout(buttonLayout)
         layout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
 
@@ -205,16 +202,16 @@ class FilesTab(QWidget):
         if status is not None:
             if isinstance(status, AuthStatus):
                 if not status.authorised:
-                    self.popup.error(status.info)
+                    self.popup.error(status.msg)
             elif isinstance(status, Result):
                 if status.result == Result.ERROR:
-                    self.popup.error(status.info)
+                    self.popup.error(status.msg)
                 elif status.result == Result.WARNING:
-                    self.popup.warning(status.info, **status.details)
+                    self.popup.warning(status.msg, **status.details)
                 else:
-                    self.popup.info(status.info, **status.details)
+                    self.popup.info(status.msg, **status.details)
             else:
-                self.status.disable(status)
+                self.popup.info(status)
 
     def updateFinish(self):
         pass
@@ -230,13 +227,14 @@ class FilesTab(QWidget):
                    on_result=self.updateResult,
                    on_finish=self.updateFinish)
 
+    @licensed(state['appname'])
     def getFilesFromServer(self, _progress):
         server = paths.get_kthmadata(True)
         local = paths.get_localdata(True)
 
         server_structure = self.serverStructure.getText()
         local_structure = self.localStructure.getText()
-        
+
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
 

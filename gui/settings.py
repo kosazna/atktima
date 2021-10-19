@@ -53,10 +53,12 @@ class SettingsTab(QWidget):
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
+
         self.saveButton.subscribe(self.onSave)
         self.dbButton.subscribe(lambda: db.open_db(paths.get_db_exe()))
         self.licButton.subscribe(self.onLicUpload)
         self.meletes.subscribe(self.onMeletiChanged)
+
         self.kthmadata.lineEdit.textChanged.connect(self.areSettingsChanged)
         self.kthmatemp.lineEdit.textChanged.connect(self.areSettingsChanged)
         self.fullnameInsert.lineEdit.textChanged.connect(
@@ -186,16 +188,16 @@ class SettingsTab(QWidget):
         if status is not None:
             if isinstance(status, AuthStatus):
                 if not status.authorised:
-                    self.popup.error(status.info)
+                    self.popup.error(status.msg)
             elif isinstance(status, Result):
                 if status.result == Result.ERROR:
-                    self.popup.error(status.info)
+                    self.popup.error(status.msg)
                 elif status.result == Result.WARNING:
-                    self.popup.warning(status.info, **status.details)
+                    self.popup.warning(status.msg, **status.details)
                 else:
-                    self.popup.info(status.info, **status.details)
+                    self.popup.info(status.msg, **status.details)
             else:
-                self.status.disable(status)
+                self.popup.info(status)
 
     def updateFinish(self):
         pass
