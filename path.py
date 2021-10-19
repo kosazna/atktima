@@ -20,6 +20,11 @@ class KtimaPaths(PathEngine):
         cls.kthmadata = Path(kthmadata)
         cls.kthmatemp = Path(kthmatemp)
 
+    def get_meleti(self, obj: bool = False):
+        if obj:
+            return self.meleti
+        return self.meleti.as_posix()
+
     def get_kthmadata(self, obj: bool = False):
         if obj:
             return self.kthmadata
