@@ -74,7 +74,6 @@ class KtimaUI(QWidget):
         self.filesTab.company.setText(state['company'])
         self.filesTab.otas.clearContent()
         self.filesTab.otas.addItems(meleti_otas)
-        self.filesTab.otas.toggle()
         self.filesTab.companyOtaCombo.clearItems()
         self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
 

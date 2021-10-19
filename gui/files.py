@@ -233,17 +233,17 @@ class FilesTab(QWidget):
     def getFilesFromServer(self, _progress):
         server = paths.get_kthmadata(True)
         local = paths.get_localdata(True)
+
         server_structure = self.serverStructure.getText()
         local_structure = self.localStructure.getText()
+        
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
 
-        _progress.emit({'pbar_max': len(user_otas)})
-
-        ota_counter = 0
-        file_counter = 0
-
         if user_otas and user_shapes:
+            _progress.emit({'pbar_max': len(user_otas)})
+            ota_counter = 0
+            file_counter = 0
             for ota in user_otas:
                 ota_counter += 1
                 for shape in user_shapes:

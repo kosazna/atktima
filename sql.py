@@ -35,7 +35,7 @@ class KtimaSQL(SQLiteEngine):
         self.update(settings.set(**params))
 
     def get_user_settings(self) -> dict:
-        username = user()
+        username = 'test'
         query = app_queries['select_user_settings'].attrs(fetch='row',
                                                           colname=True).set(username=username)
         result = self.select(query)

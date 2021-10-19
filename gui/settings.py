@@ -235,13 +235,6 @@ class SettingsTab(QWidget):
         self.areSettingsChanged()
         self.status.disable()
 
-    def onSave(self):
-        run_thread(threadpool=self.threadpool,
-                   function=self.saveAction,
-                   on_update=self.updateProgress,
-                   on_result=self.updateResult,
-                   on_finish=self.updateFinish)
-
     def onLicUpload(self):
         run_thread(threadpool=self.threadpool,
                    function=self.licUploadAction,
@@ -253,12 +246,15 @@ class SettingsTab(QWidget):
         src = self.lic.getText()
         return load_lic(filepath=src, dst=paths.get_authfolder())
 
-    def saveAction(self, _progress):
+    def onSave(self):
         state['meleti'] = self.pickedMeleti
         state['kthmatemp'] = self.kthmatemp.getText()
         state['kthmadata'] = self.kthmadata.getText()
         state['company'] = self.companyInsert.getText()
         state['fullname'] = self.fullnameInsert.getText()
+
+        self.company.setText(state['company'])
+        self.fullname.setText(state['fullname'])
 
         paths.set_attrs(state['meleti'], state['kthmadata'], state['kthmatemp'])
 
@@ -266,7 +262,7 @@ class SettingsTab(QWidget):
         self.saveButton.disable()
         self.settingsChanged.emit()
 
-        return Result.success("Οι ρυθμίσεις αποθηκεύτηκαν")
+        self.popup.info("Οι ρυθμίσεις αποθηκεύτηκαν")
 
 
 if __name__ == '__main__':
