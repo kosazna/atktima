@@ -66,12 +66,13 @@ class CountTab(QWidget):
         layout = QVBoxLayout()
         labelLayout = QHBoxLayout()
         countLayout = QHBoxLayout()
-        shapeLayout = QVBoxLayout()
-        shapeLayout.setContentsMargins(4, 2, 4, 2)
-        shapeLayout.setSpacing(0)
-        restLayout = QVBoxLayout()
-        restLayout.setContentsMargins(4, 2, 4, 2)
-        restLayout.setSpacing(0)
+        self.shapeLayout = QVBoxLayout()
+        self.shapeLayout.setContentsMargins(4, 2, 4, 2)
+        self.shapeLayout.setSpacing(0)
+        self.restLayout = QVBoxLayout()
+        self.restLayout.setContentsMargins(4, 2, 4, 2)
+        self.restLayout.setSpacing(0)
+        self.restLayout.addStretch(0)
 
         buttonLayout = QHBoxLayout()
 
@@ -105,21 +106,21 @@ class CountTab(QWidget):
                                       labelsize=(100, 18),
                                       statussize=(50, 18), parent=self)
                 self.widgetMap[shape] = _widget
-                shapeLayout.addWidget(_widget)
+                self.shapeLayout.addWidget(_widget)
             else:
                 _widget = StatusLabel(label=shape, status='0',
                                       labelsize=(140, 18),
                                       statussize=(50, 18), parent=self)
                 self.widgetMap[shape] = _widget
-                restLayout.addWidget(_widget)
+                self.restLayout.addWidget(_widget)
 
         for xml in xmls:
             _widget = StatusLabel(label=xml, status='0',
                                   labelsize=(140, 18),
                                   statussize=(50, 18), parent=self)
             self.widgetMap[xml] = _widget
-            restLayout.addWidget(_widget)
-        restLayout.addStretch(2)
+            self.restLayout.addWidget(_widget)
+        
 
         self.buttonMissing.disable()
 
@@ -130,8 +131,8 @@ class CountTab(QWidget):
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
         layout.addWidget(self.folder)
-        countLayout.addLayout(shapeLayout)
-        countLayout.addLayout(restLayout, stretch=1)
+        countLayout.addLayout(self.shapeLayout)
+        countLayout.addLayout(self.restLayout)
         layout.addLayout(countLayout)
         buttonLayout.addWidget(self.buttonCount)
         buttonLayout.addWidget(self.buttonMissing)
@@ -139,6 +140,37 @@ class CountTab(QWidget):
         layout.addLayout(buttonLayout)
 
         self.setLayout(layout)
+
+    def refreshShapes(self):
+        for shape in self.widgetMap:
+            if shape == 'VSTEAS_REL' or shape in xmls:
+                self.restLayout.removeWidget(self.widgetMap[shape])
+            else:
+                self.shapeLayout.removeWidget(self.widgetMap[shape])
+
+        self.widgetMap = {}
+
+        for shape in db.get_shapes(state['meleti']):
+            if shape != 'VSTEAS_REL':
+                _widget = StatusLabel(label=shape, status='0',
+                                      labelsize=(100, 18),
+                                      statussize=(50, 18), parent=self)
+                self.widgetMap[shape] = _widget
+                self.shapeLayout.addWidget(_widget)
+            else:
+                _widget = StatusLabel(label=shape, status='0',
+                                      labelsize=(140, 18),
+                                      statussize=(50, 18), parent=self)
+                self.widgetMap[shape] = _widget
+                self.restLayout.addWidget(_widget)
+
+        for xml in xmls:
+            _widget = StatusLabel(label=xml, status='0',
+                                  labelsize=(140, 18),
+                                  statussize=(50, 18), parent=self)
+            self.widgetMap[xml] = _widget
+            self.restLayout.addWidget(_widget)
+        # self.restLayout.addStretch(2)
 
     def countFiles(self):
         folder = self.folder.getText()
@@ -167,6 +199,11 @@ class CountTab(QWidget):
                             else:
                                 self.widgetMap[shape].setStyle('statusWarning')
                                 self.missingShapes.append(shape)
+
+            for shape in self.widgetMap:
+                if self.widgetMap[shape].getText() == '0':
+                    self.widgetMap[shape].setStyle('statusError')
+
             if self.missingShapes:
                 self.buttonMissing.enable()
         else:

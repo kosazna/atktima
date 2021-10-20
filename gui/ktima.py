@@ -82,6 +82,11 @@ class KtimaUI(QWidget):
         self.filesTab.companyOtaCombo.clearItems()
         self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
 
+        self.countTab.meleti.setText(state['meleti'])
+        self.countTab.fullname.setText(state['fullname'])
+        self.countTab.company.setText(state['company'])
+        self.countTab.refreshShapes()
+
     @pyqtSlot(tuple)
     def onServerStatusChanged(self, status):
         self.filesTab.server.changeStatus(*status)
