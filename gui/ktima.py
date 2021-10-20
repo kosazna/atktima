@@ -19,8 +19,10 @@ from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,
 
 from atktima.gui.settings import SettingsTab
 from atktima.gui.files import FilesTab
+from atktima.gui.count import CountTab
 
 from atktima.state import state
+from atktima.sql import db
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
 log.set_mode("GUI")
@@ -47,7 +49,6 @@ class KtimaUI(QWidget):
         set_size(widget=self, size=size)
 
         self.appLayout = QHBoxLayout()
-        # self.tabLayout = QVBoxLayout()
 
         self.console = Console(size=(450, None), parent=self)
 
@@ -58,6 +59,8 @@ class KtimaUI(QWidget):
         self.tabs.addTab(self.settingsTab, "Ρυθμίσεις")
         self.filesTab = FilesTab(size=(650, None), parent=self)
         self.tabs.addTab(self.filesTab, "Ενημέρωση Αρχείων")
+        self.countTab = CountTab(size=(650, None), parent=self)
+        self.tabs.addTab(self.countTab, "Καταμέτρηση")
 
         self.appLayout.addWidget(self.tabs)
         self.appLayout.addWidget(self.console)
@@ -72,6 +75,8 @@ class KtimaUI(QWidget):
         self.filesTab.meleti.setText(state['meleti'])
         self.filesTab.fullname.setText(state['fullname'])
         self.filesTab.company.setText(state['company'])
+        self.filesTab.shape.clearContent()
+        self.filesTab.shape.addItems(db.get_shapes(state['meleti']))
         self.filesTab.otas.clearContent()
         self.filesTab.otas.addItems(meleti_otas)
         self.filesTab.companyOtaCombo.clearItems()

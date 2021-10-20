@@ -57,8 +57,8 @@ class FilesTab(QWidget):
         self.popup = Popup(state['appname'])
 
         self.serverLoad.clicked.connect(self.onGetFromServer)
-        self.serverCombo.subscribe(self.serverStructure.setText)
-        self.localCombo.subscribe(self.localStructure.setText)
+        self.serverCombo.subscribe(self.serverComboChange)
+        self.localCombo.subscribe(self.localComboChange)
         self.otas.assignLoadFunc(self.loadOtas)
 
     def setupUi(self, size):
@@ -98,20 +98,22 @@ class FilesTab(QWidget):
                                parent=self)
 
         self.serverLoad = Button("Φόρτωση απο Server",
-                                 color='blue',
+                                 color='green',
                                  size=(180, 30),
                                  parent=self)
 
         self.serverCombo = ComboInput(label="Δομή Server",
                                       labelsize=(80, 24),
                                       items=['<ota>/SHP',
-                                             '<ota>/SHP/<shape>'],
+                                             '<ota>/SHP/<shape>',
+                                             'Άλλο...'],
                                       combosize=(200, 24),
                                       parent=self)
         self.localCombo = ComboInput(label="Δομή Τοπικά",
                                      labelsize=(80, 24),
                                      items=['<ota>/SHAPE/<shape>',
-                                            '<ota>/<shape>'],
+                                            '<ota>/<shape>',
+                                            'Άλλο...'],
                                      combosize=(200, 24),
                                      parent=self)
         self.companyOtaCombo = ComboInput(label="ΟΤΑ για εταιρία",
@@ -136,9 +138,12 @@ class FilesTab(QWidget):
         else:
             self.serverCombo.setCurrentText('<ota>/SHP/<shape>')
             self.serverStructure.setText('<ota>/SHP/<shape>')
+        
+        self.serverStructure.disable()
 
         self.localCombo.setCurrentText('<ota>/<shape>')
         self.localStructure.setText('<ota>/<shape>')
+        self.localStructure.disable()
         self.companyOtaCombo.setCurrentText(state['company'])
 
         self.checkServer()
@@ -176,6 +181,30 @@ class FilesTab(QWidget):
         layout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
+
+    def serverComboChange(self):
+        current_server = self.serverCombo.getCurrentText()
+
+        if current_server == 'Άλλο...':
+            self.serverStructure.enable()
+            self.serverStructure.lineEdit.setPlaceholderText("Μοτίβο...")
+            self.serverStructure.setText('')
+        else:
+            self.serverStructure.disable()
+            self.serverStructure.lineEdit.setPlaceholderText("")
+            self.serverStructure.setText(current_server)
+    
+    def localComboChange(self):
+        current_local = self.localCombo.getCurrentText()
+
+        if current_local == 'Άλλο...':
+            self.localStructure.enable()
+            self.localStructure.lineEdit.setPlaceholderText("Μοτίβο...")
+            self.localStructure.setText('')
+        else:
+            self.localStructure.disable()
+            self.localStructure.lineEdit.setPlaceholderText("")
+            self.localStructure.setText(current_local)
 
     def checkServer(self):
         if Path(state['kthmadata']).exists():
@@ -260,8 +289,10 @@ class FilesTab(QWidget):
                             file_counter += 1
                 _progress.emit({'pbar': ota_counter})
 
-            return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
+            if file_counter:
+                return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
                                 details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
+            return Result.warning("Δεν έγινε αντιγραφή για κανένα αρχείο")
         else:
             return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
 
