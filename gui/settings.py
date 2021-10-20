@@ -95,7 +95,7 @@ class SettingsTab(QWidget):
                              label=state['version'],
                              parent=self)
 
-        self.fullnameInsert = StrInput(label="'Ονομα",
+        self.fullnameInsert = StrInput(label="Χρήστης",
                                        editsize=(250, 24),
                                        parent=self)
         self.companyInsert = StrInput(label="Εταιρία",
