@@ -120,14 +120,14 @@ class FilesTab(QWidget):
                                         labelsize=(100, 24),
                                         combosize=(180, 24),
                                         parent=self)
-        self.serverWidget.setCurrentText('NAMA Server')
-        self.localWidget.setCurrentText(state['company'])
         self.localFolder = FolderInput(label="Φάκελος", parent=self)
         self.localLoad = Button("Φόρτωση από Φάκελο",
                                 size=(180, 30),
                                 parent=self)
-        self.progress = ProgressBar(parent=self)
 
+        self.progress = ProgressBar(parent=self)
+        self.serverWidget.setCurrentText('NAMA Server')
+        self.localWidget.setCurrentText(state['company'])
         self.localLoad.disable()
         self.checkServer()
         self.shape.addItems(db.get_shapes(state['meleti']))

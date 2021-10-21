@@ -86,11 +86,12 @@ class KtimaUI(QWidget):
         self.countTab.fullname.setText(state['fullname'])
         self.countTab.company.setText(state['company'])
         self.countTab.refreshShapes()
-        # self.countTab.folder.clearItems()
-        # path_mapping = {'LocalData': paths.get_localdata(),
-        #                 'ParadosiData': paths.get_paradosidata()}
-        # self.countTab.folder.addItems(path_mapping)
-
+        self.countTab.folder.clearItems()
+        path_mapping = {'LocalData': paths.get_localdata(),
+                        'ParadosiData': paths.get_paradosidata(),
+                        'Other...': ''}
+        self.countTab.folder.addItems(path_mapping)
+        self.countTab.folder.setCurrentText('LocalData')
 
     @pyqtSlot(tuple)
     def onServerStatusChanged(self, status):

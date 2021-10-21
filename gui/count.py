@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import sip
 from pathlib import Path
 from time import sleep
 from typing import Any, Tuple, Union
@@ -107,6 +108,8 @@ class CountTab(QWidget):
                                     size=(180, 30),
                                     parent=self)
 
+        self.folder.setCurrentText('LocalData')
+
         for shape in db.get_shapes(state['meleti']):
             if shape != 'VSTEAS_REL':
                 _widget = StatusLabel(label=shape, status='0',
@@ -153,6 +156,7 @@ class CountTab(QWidget):
                 self.restLayout.removeWidget(self.widgetMap[shape])
             else:
                 self.shapeLayout.removeWidget(self.widgetMap[shape])
+            sip.delete(self.widgetMap[shape])
 
         self.widgetMap = {}
 
@@ -178,6 +182,10 @@ class CountTab(QWidget):
             self.restLayout.addWidget(_widget)
 
     def countFiles(self):
+        for shape in self.widgetMap:
+            self.widgetMap[shape].setText('0')
+        self.missingShapes = []
+
         folder = self.folder.getText()
 
         all_folders = [p for p in Path(folder).iterdir() if p.is_dir()]
@@ -216,7 +224,22 @@ class CountTab(QWidget):
 
     def findMissing(self):
         if self.missingShapes:
-            pass
+            all_otas = db.get_ota_per_meleti(state['meleti'], 'NAMA')
+            folder = self.folder.getText()
+            for shape in self.missingShapes:
+                all_file_parts = [p.parts for p in Path(
+                    folder).glob(f'**/{shape}.*')]
+                log.warning(f'[{shape}] Missing:')
+
+                for ota in all_otas:
+                    found = False
+                    for parts in all_file_parts:
+                        if ota in parts:
+                            found = True
+                            break
+
+                    if not found:
+                        log.info(ota)
         else:
             self.popup.warning("Δεν έχει γίνει ακόμα καταμέτρηση")
 

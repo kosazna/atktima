@@ -66,6 +66,14 @@ class KtimaSQL(SQLiteEngine):
 
         return meletes
 
+    def get_ota_per_meleti(self, meleti: str, company: str):
+        query = app_queries['select_ota_from_meleti_company'].attrs(
+            fetch='col').set(meleti=meleti, company=company)
+
+        meleti_company_ota = db.select(query)
+
+        return meleti_company_ota
+
     def get_shapes(self, meleti: str, stype='ktima'):
         query = app_queries['select_shapes'].attrs(
             fetch='col').set(meleti=meleti, type=stype)
