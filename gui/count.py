@@ -25,6 +25,7 @@ from at.gui.status import StatusButton, StatusLabel
 from at.gui.utils import *
 from at.gui.worker import run_thread
 from at.io.copyfuncs import batch_copy_file, copy_file
+from at.gui.selector import PathSelector
 from at.logger import log
 from at.result import Result
 from at.path import PathEngine
@@ -89,9 +90,15 @@ class CountTab(QWidget):
                             label=state['meleti'],
                             parent=self)
 
-        self.folder = FolderInput(label="Φάκελος αρχείων",
-                                  labelsize=(110, 24),
-                                  parent=self)
+        path_mapping = {'LocalData': paths.get_localdata(),
+                        'ParadosiData': paths.get_paradosidata()}
+        self.folder = PathSelector(label="Φάκελος αρχείων",
+                                   selectortype='folder_in',
+                                   mapping=path_mapping,
+                                   orientation=VERTICAL,
+                                   combosize=(180, 24),
+                                   labelsize=(None, 24),
+                                   parent=self)
 
         self.buttonCount = Button(label='Καταμέτρηση',
                                   size=(180, 30),
@@ -120,7 +127,6 @@ class CountTab(QWidget):
                                   statussize=(50, 18), parent=self)
             self.widgetMap[xml] = _widget
             self.restLayout.addWidget(_widget)
-        
 
         self.buttonMissing.disable()
 
@@ -170,7 +176,6 @@ class CountTab(QWidget):
                                   statussize=(50, 18), parent=self)
             self.widgetMap[xml] = _widget
             self.restLayout.addWidget(_widget)
-        # self.restLayout.addStretch(2)
 
     def countFiles(self):
         folder = self.folder.getText()

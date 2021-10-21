@@ -79,8 +79,8 @@ class KtimaUI(QWidget):
         self.filesTab.shape.addItems(db.get_shapes(state['meleti']))
         self.filesTab.otas.clearContent()
         self.filesTab.otas.addItems(meleti_otas)
-        self.filesTab.companyOtaCombo.clearItems()
-        self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
+        # self.filesTab.companyOtaCombo.clearItems()
+        # self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
 
         self.countTab.meleti.setText(state['meleti'])
         self.countTab.fullname.setText(state['fullname'])

@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from time import sleep
 from typing import Any, Tuple, Union
-
+from at.gui.selector import StrSelector
 from at.text import replace_all
 from at.auth.utils import load_lic
 from PyQt5 import QtWidgets
@@ -58,8 +58,8 @@ class FilesTab(QWidget):
 
         self.serverLoad.clicked.connect(self.onGetFromServer)
         self.localLoad.clicked.connect(self.onGetFromLocal)
-        self.serverCombo.subscribe(self.serverComboChange)
-        self.localCombo.subscribe(self.localComboChange)
+        # self.serverCombo.subscribe(self.serverComboChange)
+        # self.localCombo.subscribe(self.localComboChange)
         self.otas.assignLoadFunc(self.loadOtas)
         self.localFolder.lineEdit.textChanged.connect(self.checkLocalFolder)
 
@@ -68,8 +68,6 @@ class FilesTab(QWidget):
 
         layout = QVBoxLayout()
         labelLayout = QHBoxLayout()
-        serverStruct = QHBoxLayout()
-        localStruct = QHBoxLayout()
         listLayout = QHBoxLayout()
         buttonLayout = QHBoxLayout()
 
@@ -95,66 +93,42 @@ class FilesTab(QWidget):
                           parent=self)
         self.shape = ListWidget(label="Επιλογή αρχείων",
                                 parent=self)
-
         self.otas = ListWidget(label="Επιλογή ΟΤΑ",
                                parent=self)
-
         self.serverLoad = Button("Φόρτωση από Server",
                                  color='green',
                                  size=(180, 30),
                                  parent=self)
-
-        self.serverCombo = ComboInput(label="Δομή Server",
-                                      labelsize=(80, 24),
-                                      items=['<ota>/SHP',
-                                             '<ota>/SHP/<shape>',
-                                             'Άλλο...'],
-                                      combosize=(200, 24),
-                                      parent=self)
-        self.localCombo = ComboInput(label="Δομή Τοπικά",
-                                     labelsize=(80, 24),
-                                     items=['<ota>/SHAPE/<shape>',
-                                            '<ota>/<shape>',
-                                            'Άλλο...'],
-                                     combosize=(200, 24),
-                                     parent=self)
-        self.companyOtaCombo = ComboInput(label="ΟΤΑ για εταιρία",
-                                          labelsize=(100, 24),
-                                          items=state[state['meleti']
-                                                      ]['company'].keys(),
-                                          combosize=(100, 24),
-                                          parent=self)
-        self.serverStructure = StrInput(completer=['<ota>/SHP',
-                                                   '<ota>/SHP/<shape>'],
-                                        editsize=(220, 24),
+        # self.serverCombo = ComboInput(label="Δομή Server",
+        #                               labelsize=(80, 24),
+        #                               items=['<ota>/SHP',
+        #                                      '<ota>/SHP/<shape>',
+        #                                      'Άλλο...'],
+        #                               combosize=(200, 24),
+        #                               parent=self)
+        server_mapping = {"NAMA Server": '<ota>/SHP',
+                          "2KP Server": '<ota>/SHP/<shape>'}
+        self.serverWidget = StrSelector(label="Δομή Εισαγωγής",
+                                        mapping=server_mapping,
+                                        labelsize=(100, 24),
+                                        combosize=(180, 24),
                                         parent=self)
-        self.localStructure = StrInput(completer=['<ota>/SHAPE/<shape>',
-                                                  '<ota>/<shape>'],
-                                       editsize=(220, 24),
-                                       parent=self)
-
+        local_mapping = {"ktima16": '<ota>/<shape>',
+                         "ktimaOld": '<ota>/SHAPE/<shape>'}
+        self.localWidget = StrSelector(label="Δομή Τοπικά",
+                                        mapping=local_mapping,
+                                        labelsize=(100, 24),
+                                        combosize=(180, 24),
+                                        parent=self)
+        self.serverWidget.setCurrentText('NAMA Server')
+        self.localWidget.setCurrentText(state['company'])
         self.localFolder = FolderInput(label="Φάκελος", parent=self)
         self.localLoad = Button("Φόρτωση από Φάκελο",
                                 size=(180, 30),
                                 parent=self)
-
         self.progress = ProgressBar(parent=self)
 
-        if state['company'] == 'NAMA':
-            self.serverCombo.setCurrentText('<ota>/SHP')
-            self.serverStructure.setText('<ota>/SHP')
-        else:
-            self.serverCombo.setCurrentText('<ota>/SHP/<shape>')
-            self.serverStructure.setText('<ota>/SHP/<shape>')
-
-        self.serverStructure.disable()
         self.localLoad.disable()
-
-        self.localCombo.setCurrentText('<ota>/<shape>')
-        self.localStructure.setText('<ota>/<shape>')
-        self.localStructure.disable()
-        self.companyOtaCombo.setCurrentText(state['company'])
-
         self.checkServer()
         self.shape.addItems(db.get_shapes(state['meleti']))
         self.otas.addItems(state[state['meleti']]['company']['NAMA'])
@@ -168,19 +142,10 @@ class FilesTab(QWidget):
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
         layout.addWidget(self.info)
-        serverStruct.addWidget(self.serverCombo)
-        serverStruct.addWidget(self.serverStructure,
-                               stretch=2,
-                               alignment=Qt.AlignLeft)
-        localStruct.addWidget(self.localCombo)
-        localStruct.addWidget(self.localStructure,
-                              stretch=2,
-                              alignment=Qt.AlignLeft)
 
-        layout.addLayout(serverStruct)
-        layout.addLayout(localStruct)
+        layout.addWidget(self.serverWidget)
+        layout.addWidget(self.localWidget)
         layout.addWidget(HLine())
-        layout.addWidget(self.companyOtaCombo, alignment=Qt.AlignRight)
         listLayout.addWidget(self.shape)
         listLayout.addWidget(self.otas)
         layout.addLayout(listLayout)
@@ -202,30 +167,6 @@ class FilesTab(QWidget):
                 self.localLoad.disable()
         else:
             self.localLoad.disable()
-
-    def serverComboChange(self):
-        current_server = self.serverCombo.getCurrentText()
-
-        if current_server == 'Άλλο...':
-            self.serverStructure.enable()
-            self.serverStructure.lineEdit.setPlaceholderText("Μοτίβο...")
-            self.serverStructure.setText('')
-        else:
-            self.serverStructure.disable()
-            self.serverStructure.lineEdit.setPlaceholderText("")
-            self.serverStructure.setText(current_server)
-
-    def localComboChange(self):
-        current_local = self.localCombo.getCurrentText()
-
-        if current_local == 'Άλλο...':
-            self.localStructure.enable()
-            self.localStructure.lineEdit.setPlaceholderText("Μοτίβο...")
-            self.localStructure.setText('')
-        else:
-            self.localStructure.disable()
-            self.localStructure.lineEdit.setPlaceholderText("")
-            self.localStructure.setText(current_local)
 
     def checkServer(self):
         if Path(state['kthmadata']).exists():
@@ -266,27 +207,26 @@ class FilesTab(QWidget):
     def updateFinish(self):
         pass
 
-    def loadOtas(self):
-        company = self.companyOtaCombo.getCurrentText()
-        return state[state['meleti']]['company'][company]
+    # def loadOtas(self):
+    #     company = [self.companyOtaCombo.getCurrentText()]
+    #     return state[state['meleti']]['company'][company]
 
     def onGetFromServer(self):
         run_thread(threadpool=self.threadpool,
-                function=self.getFilesFromServer,
-                on_update=self.updateProgress,
-                on_result=self.updateResult,
-                on_finish=self.updateFinish)
-
+                   function=self.getFilesFromServer,
+                   on_update=self.updateProgress,
+                   on_result=self.updateResult,
+                   on_finish=self.updateFinish)
 
     def onGetFromLocal(self):
         result = self.popup.info("Η δομή server είναι σωστή?",
                                  buttons=['yes', 'no'])
         if result == 'yes':
             run_thread(threadpool=self.threadpool,
-                    function=self.getFilesFromLocal,
-                    on_update=self.updateProgress,
-                    on_result=self.updateResult,
-                    on_finish=self.updateFinish)
+                       function=self.getFilesFromLocal,
+                       on_update=self.updateProgress,
+                       on_result=self.updateResult,
+                       on_finish=self.updateFinish)
         else:
             log.error("Η φόρτωση ακυρώθηκε")
 
@@ -295,8 +235,8 @@ class FilesTab(QWidget):
         server = paths.get_kthmadata(True)
         local = paths.get_localdata(True)
 
-        server_structure = self.serverStructure.getText()
-        local_structure = self.localStructure.getText()
+        server_structure = self.serverWidget.getText()
+        local_structure = self.localWidget.getText()
 
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
@@ -338,8 +278,8 @@ class FilesTab(QWidget):
         if not Path(server).exists():
             return Result.error("Ο φάκελος δεν υπάρχει")
 
-        server_structure = self.serverStructure.getText()
-        local_structure = self.localStructure.getText()
+        server_structure = self.serverWidget.getText()
+        local_structure = self.localWidget.getText()
 
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
