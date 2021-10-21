@@ -58,9 +58,9 @@ class CountTab(QWidget):
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
-        self.buttonCount.subscribe(self.countFiles)
-        self.buttonMissing.subscribe(self.findMissing)
         self.missingShapes = []
+        self.buttonCount.subscribe(self.countFiles)
+        self.buttonMissing.subscribe(self.findMissingFiles)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -181,18 +181,17 @@ class CountTab(QWidget):
             self.widgetMap[xml] = _widget
             self.restLayout.addWidget(_widget)
 
-    def countFiles(self):
+    @licensed(state['appname'])
+    def countFiles(self, *args, **kwargs):
         for shape in self.widgetMap:
             self.widgetMap[shape].setText('0')
         self.missingShapes = []
 
         folder = self.folder.getText()
 
-        all_folders = [p for p in Path(folder).iterdir() if p.is_dir()]
-
-        folders_count = len(all_folders)
-
         if folder and Path(folder).exists():
+            all_folders = [p for p in Path(folder).iterdir() if p.is_dir()]
+            folders_count = len(all_folders)
             filters = ('*.shp', '*.mdb', '*.xml')
             ext_access_names = ('.shp', '.mdb', '.xml')
             counter = file_counter(src=folder, filters=filters)
@@ -222,7 +221,8 @@ class CountTab(QWidget):
         else:
             self.popup.error("Δώσε φάκελο για καταμέτρηση")
 
-    def findMissing(self):
+    @licensed(state['appname'])
+    def findMissingFiles(self):
         if self.missingShapes:
             all_otas = db.get_ota_per_meleti(state['meleti'], 'NAMA')
             folder = self.folder.getText()

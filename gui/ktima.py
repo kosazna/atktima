@@ -93,6 +93,8 @@ class KtimaUI(QWidget):
         self.countTab.folder.addItems(path_mapping)
         self.countTab.folder.setCurrentText('LocalData')
 
+        self.countTab.bindActions()
+
     @pyqtSlot(tuple)
     def onServerStatusChanged(self, status):
         self.filesTab.server.changeStatus(*status)
