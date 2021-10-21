@@ -57,9 +57,11 @@ class FilesTab(QWidget):
         self.popup = Popup(state['appname'])
 
         self.serverLoad.clicked.connect(self.onGetFromServer)
+        self.localLoad.clicked.connect(self.onGetFromLocal)
         self.serverCombo.subscribe(self.serverComboChange)
         self.localCombo.subscribe(self.localComboChange)
         self.otas.assignLoadFunc(self.loadOtas)
+        self.localFolder.lineEdit.textChanged.connect(self.checkLocalFolder)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -97,7 +99,7 @@ class FilesTab(QWidget):
         self.otas = ListWidget(label="Επιλογή ΟΤΑ",
                                parent=self)
 
-        self.serverLoad = Button("Φόρτωση απο Server",
+        self.serverLoad = Button("Φόρτωση από Server",
                                  color='green',
                                  size=(180, 30),
                                  parent=self)
@@ -117,10 +119,11 @@ class FilesTab(QWidget):
                                      combosize=(200, 24),
                                      parent=self)
         self.companyOtaCombo = ComboInput(label="ΟΤΑ για εταιρία",
-                                     labelsize=(100, 24),
-                                     items=state[state['meleti']]['company'].keys(),
-                                     combosize=(100, 24),
-                                     parent=self)
+                                          labelsize=(100, 24),
+                                          items=state[state['meleti']
+                                                      ]['company'].keys(),
+                                          combosize=(100, 24),
+                                          parent=self)
         self.serverStructure = StrInput(completer=['<ota>/SHP',
                                                    '<ota>/SHP/<shape>'],
                                         editsize=(220, 24),
@@ -130,6 +133,11 @@ class FilesTab(QWidget):
                                        editsize=(220, 24),
                                        parent=self)
 
+        self.localFolder = FolderInput(label="Φάκελος", parent=self)
+        self.localLoad = Button("Φόρτωση από Φάκελο",
+                                size=(180, 30),
+                                parent=self)
+
         self.progress = ProgressBar(parent=self)
 
         if state['company'] == 'NAMA':
@@ -138,8 +146,9 @@ class FilesTab(QWidget):
         else:
             self.serverCombo.setCurrentText('<ota>/SHP/<shape>')
             self.serverStructure.setText('<ota>/SHP/<shape>')
-        
+
         self.serverStructure.disable()
+        self.localLoad.disable()
 
         self.localCombo.setCurrentText('<ota>/<shape>')
         self.localStructure.setText('<ota>/<shape>')
@@ -175,12 +184,24 @@ class FilesTab(QWidget):
         listLayout.addWidget(self.shape)
         listLayout.addWidget(self.otas)
         layout.addLayout(listLayout)
-        layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
+        layout.addWidget(HLine())
+        layout.addWidget(self.localFolder)
         buttonLayout.addWidget(self.serverLoad)
+        buttonLayout.addWidget(self.localLoad)
         layout.addLayout(buttonLayout)
+        layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
         layout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
+
+    def checkLocalFolder(self):
+        if self.localFolder.getText():
+            if Path(self.localFolder.getText()).exists():
+                self.localLoad.enable()
+            else:
+                self.localLoad.disable()
+        else:
+            self.localLoad.disable()
 
     def serverComboChange(self):
         current_server = self.serverCombo.getCurrentText()
@@ -193,7 +214,7 @@ class FilesTab(QWidget):
             self.serverStructure.disable()
             self.serverStructure.lineEdit.setPlaceholderText("")
             self.serverStructure.setText(current_server)
-    
+
     def localComboChange(self):
         current_local = self.localCombo.getCurrentText()
 
@@ -251,10 +272,23 @@ class FilesTab(QWidget):
 
     def onGetFromServer(self):
         run_thread(threadpool=self.threadpool,
-                   function=self.getFilesFromServer,
-                   on_update=self.updateProgress,
-                   on_result=self.updateResult,
-                   on_finish=self.updateFinish)
+                function=self.getFilesFromServer,
+                on_update=self.updateProgress,
+                on_result=self.updateResult,
+                on_finish=self.updateFinish)
+
+
+    def onGetFromLocal(self):
+        result = self.popup.info("Η δομή server είναι σωστή?",
+                                 buttons=['yes', 'no'])
+        if result == 'yes':
+            run_thread(threadpool=self.threadpool,
+                    function=self.getFilesFromLocal,
+                    on_update=self.updateProgress,
+                    on_result=self.updateResult,
+                    on_finish=self.updateFinish)
+        else:
+            log.error("Η φόρτωση ακυρώθηκε")
 
     @licensed(state['appname'])
     def getFilesFromServer(self, _progress):
@@ -278,7 +312,7 @@ class FilesTab(QWidget):
                         pass
                     else:
                         sub_server = replace_all(server_structure,
-                                                {'shape': shape, 'ota': ota})
+                                                 {'shape': shape, 'ota': ota})
                         sub_local = replace_all(local_structure,
                                                 {'shape': shape, 'ota': ota})
                         _src = server.joinpath(f"{sub_server}/{shape}.shp")
@@ -291,7 +325,50 @@ class FilesTab(QWidget):
 
             if file_counter:
                 return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
-                                details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
+                                      details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
+            return Result.warning("Δεν έγινε αντιγραφή για κανένα αρχείο")
+        else:
+            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
+
+    @licensed(state['appname'])
+    def getFilesFromLocal(self, _progress):
+        server = self.localFolder.getText()
+        local = paths.get_localdata(True)
+
+        if not Path(server).exists():
+            return Result.error("Ο φάκελος δεν υπάρχει")
+
+        server_structure = self.serverStructure.getText()
+        local_structure = self.localStructure.getText()
+
+        user_shapes = self.shape.getCheckState()
+        user_otas = self.otas.getCheckState()
+
+        if user_otas and user_shapes:
+            _progress.emit({'pbar_max': len(user_otas)})
+            ota_counter = 0
+            file_counter = 0
+            for ota in user_otas:
+                ota_counter += 1
+                for shape in user_shapes:
+                    if shape == 'VSTEAS_REL':
+                        pass
+                    else:
+                        sub_server = replace_all(server_structure,
+                                                 {'shape': shape, 'ota': ota})
+                        sub_local = replace_all(local_structure,
+                                                {'shape': shape, 'ota': ota})
+                        _src = server.joinpath(f"{sub_server}/{shape}.shp")
+                        _dst = local.joinpath(f"{sub_local}/{shape}.shp")
+
+                        copied = copy_file(_src, _dst)
+                        if copied:
+                            file_counter += 1
+                _progress.emit({'pbar': ota_counter})
+
+            if file_counter:
+                return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
+                                      details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
             return Result.warning("Δεν έγινε αντιγραφή για κανένα αρχείο")
         else:
             return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')

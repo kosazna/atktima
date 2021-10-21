@@ -102,13 +102,13 @@ class SettingsTab(QWidget):
                                       editsize=(250, 24),
                                       parent=self)
         self.kthmatemp = FolderInput(label='kthmatemp',
-                                     editsize=(100, 24),
+                                     editsize=(250, 24),
                                      parent=self)
         self.kthmatempStatus = StatusLabel(icon='hdd-network-fill',
                                            statussize=(110, 24),
                                            parent=self)
         self.kthmadata = FolderInput(label='kthmadata',
-                                     editsize=(100, 24),
+                                     editsize=(250, 24),
                                      parent=self)
         self.kthmadataStatus = StatusLabel(icon='hdd-network-fill',
                                            statussize=(110, 24),
@@ -150,7 +150,7 @@ class SettingsTab(QWidget):
         layout.addWidget(self.companyInsert, alignment=Qt.AlignLeft)
         meletiLayout.addWidget(self.meletes)
         meletiLayout.addWidget(self.meleti, stretch=2, alignment=Qt.AlignLeft)
-        layout.addLayout(meletiLayout)
+        
         templayout.addWidget(self.kthmatemp)
         templayout.addWidget(self.kthmatempStatus,
                              stretch=2, alignment=Qt.AlignLeft)
@@ -159,6 +159,7 @@ class SettingsTab(QWidget):
                              stretch=2, alignment=Qt.AlignLeft)
         layout.addLayout(templayout)
         layout.addLayout(datalayout)
+        layout.addLayout(meletiLayout)
 
         buttonLayout.addWidget(self.saveButton, alignment=Qt.AlignRight)
         buttonLayout.addWidget(self.dbButton)

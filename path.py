@@ -31,8 +31,7 @@ class KtimaPaths(PathEngine):
         return self.kthmadata.as_posix()
 
     def get_localdata(self, obj: bool = False):
-        # _path = self.meleti.joinpath("!OutputData/LocalData")
-        _path = Path("D:/.temp/copy_tests")
+        _path = self.meleti.joinpath("!OutputData/LocalData")
 
         if obj:
             return _path

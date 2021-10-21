@@ -50,16 +50,16 @@ class KtimaUI(QWidget):
 
         self.appLayout = QHBoxLayout()
 
-        self.console = Console(size=(450, None), parent=self)
+        self.console = Console(size=(500, None), parent=self)
 
         self.tabs = QTabWidget(self)
         self.tabs.setDocumentMode(True)
 
-        self.settingsTab = SettingsTab(size=(650, None), parent=self)
+        self.settingsTab = SettingsTab(size=(700, None), parent=self)
         self.tabs.addTab(self.settingsTab, "Ρυθμίσεις")
-        self.filesTab = FilesTab(size=(650, None), parent=self)
+        self.filesTab = FilesTab(size=(700, None), parent=self)
         self.tabs.addTab(self.filesTab, "Ενημέρωση Αρχείων")
-        self.countTab = CountTab(size=(650, None), parent=self)
+        self.countTab = CountTab(size=(700, None), parent=self)
         self.tabs.addTab(self.countTab, "Καταμέτρηση")
 
         self.appLayout.addWidget(self.tabs)
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     app.setFont(SEGOE)
     app.setStyle('Fusion')
 
-    ui = KtimaUI(size=(None, 600))
+    ui = KtimaUI(size=(None, 650))
     ui.show()
 
     sys.exit(app.exec_())
