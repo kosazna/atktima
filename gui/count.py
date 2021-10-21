@@ -226,10 +226,11 @@ class CountTab(QWidget):
         if self.missingShapes:
             all_otas = db.get_ota_per_meleti(state['meleti'], 'NAMA')
             folder = self.folder.getText()
-            for shape in self.missingShapes:
+            for shape in sorted(self.missingShapes):
                 all_file_parts = [p.parts for p in Path(
                     folder).glob(f'**/{shape}.*')]
-                log.warning(f'[{shape}] Missing:')
+
+                log.warning(f'\n[{shape}] Missing:')
 
                 for ota in all_otas:
                     found = False
@@ -239,7 +240,7 @@ class CountTab(QWidget):
                             break
 
                     if not found:
-                        log.info(ota)
+                        log.info(f" - {ota}")
         else:
             self.popup.warning("Δεν έχει γίνει ακόμα καταμέτρηση")
 

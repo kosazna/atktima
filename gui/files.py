@@ -107,7 +107,9 @@ class FilesTab(QWidget):
         #                               combosize=(200, 24),
         #                               parent=self)
         server_mapping = {"NAMA Server": '<ota>/SHP',
-                          "2KP Server": '<ota>/SHP/<shape>'}
+                          "2KP Server": '<ota>/SHP/<shape>',
+                          "Άλλη παράδοση (ktimaOld}": '<ota>/SHAPE/<shape>',
+                          "Άλλη παράδοση (ktima16}": '<ota>/<shape>'}
         self.serverWidget = StrSelector(label="Δομή Εισαγωγής",
                                         mapping=server_mapping,
                                         labelsize=(100, 24),
@@ -116,10 +118,10 @@ class FilesTab(QWidget):
         local_mapping = {"ktima16": '<ota>/<shape>',
                          "ktimaOld": '<ota>/SHAPE/<shape>'}
         self.localWidget = StrSelector(label="Δομή Τοπικά",
-                                        mapping=local_mapping,
-                                        labelsize=(100, 24),
-                                        combosize=(180, 24),
-                                        parent=self)
+                                       mapping=local_mapping,
+                                       labelsize=(100, 24),
+                                       combosize=(180, 24),
+                                       parent=self)
         self.localFolder = FolderInput(label="Φάκελος", parent=self)
         self.localLoad = Button("Φόρτωση από Φάκελο",
                                 size=(180, 30),
@@ -272,10 +274,10 @@ class FilesTab(QWidget):
 
     @licensed(state['appname'])
     def getFilesFromLocal(self, _progress):
-        server = self.localFolder.getText()
+        server = Path(self.localFolder.getText())
         local = paths.get_localdata(True)
 
-        if not Path(server).exists():
+        if not server.exists():
             return Result.error("Ο φάκελος δεν υπάρχει")
 
         server_structure = self.serverWidget.getText()
@@ -291,19 +293,21 @@ class FilesTab(QWidget):
             for ota in user_otas:
                 ota_counter += 1
                 for shape in user_shapes:
+                    sub_server = replace_all(server_structure,
+                                             {'shape': shape, 'ota': ota})
+                    sub_local = replace_all(local_structure,
+                                            {'shape': shape, 'ota': ota})
+
                     if shape == 'VSTEAS_REL':
-                        pass
+                        _src = server.joinpath(f"{sub_server}/{shape}.mdb")
+                        _dst = local.joinpath(f"{sub_local}/{shape}.mdb")
                     else:
-                        sub_server = replace_all(server_structure,
-                                                 {'shape': shape, 'ota': ota})
-                        sub_local = replace_all(local_structure,
-                                                {'shape': shape, 'ota': ota})
                         _src = server.joinpath(f"{sub_server}/{shape}.shp")
                         _dst = local.joinpath(f"{sub_local}/{shape}.shp")
 
-                        copied = copy_file(_src, _dst)
-                        if copied:
-                            file_counter += 1
+                    copied = copy_file(_src, _dst)
+                    if copied:
+                        file_counter += 1
                 _progress.emit({'pbar': ota_counter})
 
             if file_counter:
