@@ -60,7 +60,7 @@ class FilesTab(QWidget):
         self.localLoad.clicked.connect(self.onGetFromLocal)
         # self.serverCombo.subscribe(self.serverComboChange)
         # self.localCombo.subscribe(self.localComboChange)
-        self.otas.assignLoadFunc(self.loadOtas)
+        # self.otas.assignLoadFunc(self.loadOtas)
         self.localFolder.lineEdit.textChanged.connect(self.checkLocalFolder)
 
     def setupUi(self, size):
