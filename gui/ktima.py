@@ -23,6 +23,7 @@ from atktima.gui.count import CountTab
 
 from atktima.state import state
 from atktima.sql import db
+from atktima.auth import auth
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
 log.set_mode("GUI")
@@ -40,6 +41,7 @@ class KtimaUI(QWidget):
         self.threadpool = QThreadPool(parent=self)
         self.settingsTab.settingsChanged.connect(self.onSettingsUpdate)
         self.settingsTab.serverStatusChanged.connect(self.onServerStatusChanged)
+        self.check_auth()
 
     def setupUi(self, size):
         self.setObjectName("MainWidget")
@@ -92,9 +94,19 @@ class KtimaUI(QWidget):
         self.countTab.folder.addItems(path_mapping)
         self.countTab.folder.setCurrentText('LocalData')
 
+        self.check_auth()
+
     @pyqtSlot(tuple)
     def onServerStatusChanged(self, status):
         self.filesTab.server.changeStatus(*status)
+
+    def check_auth(self):
+        status, info = auth.is_licensed(category=state['meleti'])
+        auth.change_user_auth(status)
+        if status:
+            log.success(f"{info} for {state['meleti']}")
+        else:
+            log.error(f"{info} for {state['meleti']}")
 
 
 if __name__ == '__main__':
