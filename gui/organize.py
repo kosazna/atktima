@@ -56,6 +56,7 @@ class OrganizeTab(QWidget):
         set_size(widget=self, size=size)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(2,4,2,0)
         labelLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',

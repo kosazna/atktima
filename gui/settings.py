@@ -69,6 +69,7 @@ class SettingsTab(QWidget):
         set_size(widget=self, size=size)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(2,4,2,0)
         labelLayout = QHBoxLayout()
         meletiLayout = QHBoxLayout()
         datalayout = QHBoxLayout()

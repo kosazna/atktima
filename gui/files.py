@@ -31,7 +31,7 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 # When setting fixed width to QLineEdit ->
 # -> add alignment=Qt.AlignLeft when adding widget to layout
 
-infostr = "Μόνο για τα αρχεία που θα βρεθούν θα γίνει αντιγραφή στο προορισμό"
+infostr = "Μόνο για τα αρχεία που θα βρεθούν θα γίνει αντιγραφή στο LocalData της μελέτης"
 
 
 class FilesTab(QWidget):
@@ -55,6 +55,7 @@ class FilesTab(QWidget):
         set_size(widget=self, size=size)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(2,4,2,0)
         labelLayout = QHBoxLayout()
         listLayout = QHBoxLayout()
         buttonLayout = QHBoxLayout()

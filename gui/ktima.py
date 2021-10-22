@@ -47,22 +47,22 @@ class KtimaUI(QWidget):
 
         self.appLayout = QHBoxLayout()
 
-        self.console = Console(size=(500, None), parent=self)
+        self.console = Console(size=(600, None), parent=self)
 
         self.tabs = QTabWidget(self)
         self.tabs.setDocumentMode(True)
 
-        self.settingsTab = SettingsTab(size=(700, None), parent=self)
+        self.settingsTab = SettingsTab(size=(600, None), parent=self)
         self.tabs.addTab(self.settingsTab, "Ρυθμίσεις")
-        self.filesTab = FilesTab(size=(700, None), parent=self)
-        self.tabs.addTab(self.filesTab, "Ενημέρωση Αρχείων")
-        self.countTab = CountTab(size=(700, None), parent=self)
-        self.tabs.addTab(self.countTab, "Καταμέτρηση Αρχείων")
-        self.organizeTab = OrganizeTab(size=(700, None), parent=self)
-        self.tabs.addTab(self.organizeTab, "Οργάνωση Αρχείων")
-        self.paradosiTab = ParadosiTab(size=(700, None), parent=self)
+        self.filesTab = FilesTab(size=(600, None), parent=self)
+        self.tabs.addTab(self.filesTab, "Ενημέρωση")
+        self.countTab = CountTab(size=(600, None), parent=self)
+        self.tabs.addTab(self.countTab, "Καταμέτρηση")
+        self.organizeTab = OrganizeTab(size=(600, None), parent=self)
+        self.tabs.addTab(self.organizeTab, "Οργάνωση")
+        self.paradosiTab = ParadosiTab(size=(600, None), parent=self)
         self.tabs.addTab(self.paradosiTab, "Παράδοση")
-        self.anartisiTab = AnartisiTab(size=(700, None), parent=self)
+        self.anartisiTab = AnartisiTab(size=(600, None), parent=self)
         self.tabs.addTab(self.anartisiTab, "Ανάρτηση")
 
         self.appLayout.addWidget(self.tabs)
