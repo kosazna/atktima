@@ -10,6 +10,8 @@ from atktima.gui.count import CountTab
 from atktima.gui.files import FilesTab
 from atktima.gui.anartisi import AnartisiTab
 from atktima.gui.settings import SettingsTab
+from atktima.gui.paradosi import ParadosiTab
+from atktima.gui.organize import OrganizeTab
 from atktima.path import paths
 from atktima.sql import db
 from atktima.state import state
@@ -55,7 +57,11 @@ class KtimaUI(QWidget):
         self.filesTab = FilesTab(size=(700, None), parent=self)
         self.tabs.addTab(self.filesTab, "Ενημέρωση Αρχείων")
         self.countTab = CountTab(size=(700, None), parent=self)
-        self.tabs.addTab(self.countTab, "Καταμέτρηση")
+        self.tabs.addTab(self.countTab, "Καταμέτρηση Αρχείων")
+        self.organizeTab = OrganizeTab(size=(700, None), parent=self)
+        self.tabs.addTab(self.organizeTab, "Οργάνωση Αρχείων")
+        self.paradosiTab = ParadosiTab(size=(700, None), parent=self)
+        self.tabs.addTab(self.paradosiTab, "Παράδοση")
         self.anartisiTab = AnartisiTab(size=(700, None), parent=self)
         self.tabs.addTab(self.anartisiTab, "Ανάρτηση")
 
@@ -88,6 +94,14 @@ class KtimaUI(QWidget):
                         'Other...': ''}
         self.countTab.folder.addItems(path_mapping)
         self.countTab.folder.setCurrentText('LocalData')
+
+        self.organizeTab.meleti.setText(state['meleti'])
+        self.organizeTab.fullname.setText(state['fullname'])
+        self.organizeTab.company.setText(state['company'])
+
+        self.paradosiTab.meleti.setText(state['meleti'])
+        self.paradosiTab.fullname.setText(state['fullname'])
+        self.paradosiTab.company.setText(state['company'])
 
         self.anartisiTab.meleti.setText(state['meleti'])
         self.anartisiTab.fullname.setText(state['fullname'])
