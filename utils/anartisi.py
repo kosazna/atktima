@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Callable, Union
 

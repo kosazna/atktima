@@ -8,6 +8,7 @@ from at.logger import log
 from atktima.auth import auth
 from atktima.gui.count import CountTab
 from atktima.gui.files import FilesTab
+from atktima.gui.anartisi import AnartisiTab
 from atktima.gui.settings import SettingsTab
 from atktima.path import paths
 from atktima.sql import db
@@ -55,6 +56,8 @@ class KtimaUI(QWidget):
         self.tabs.addTab(self.filesTab, "Ενημέρωση Αρχείων")
         self.countTab = CountTab(size=(700, None), parent=self)
         self.tabs.addTab(self.countTab, "Καταμέτρηση")
+        self.anartisiTab = AnartisiTab(size=(700, None), parent=self)
+        self.tabs.addTab(self.anartisiTab, "Ανάρτηση")
 
         self.appLayout.addWidget(self.tabs)
         self.appLayout.addWidget(self.console)
