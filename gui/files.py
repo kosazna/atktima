@@ -1,41 +1,32 @@
 # -*- coding: utf-8 -*-
 import sys
 from pathlib import Path
-from time import sleep
-from typing import Any, Tuple, Union
-from at.gui.selector import StrSelector
-from at.text import replace_all
-from at.auth.utils import load_lic
-from PyQt5 import QtWidgets
-from at.gui.line import HLine
-from at.auth.client import Authorize, AuthStatus, licensed
+from typing import Any, Tuple
+
+from at.auth.client import AuthStatus, licensed
 from at.gui.button import Button
-from at.gui.check import CheckInput
-from at.gui.combo import ComboInput
-from at.gui.console import Console
-from at.gui.filename import FileNameInput
 from at.gui.icons import *
-from at.gui.input import IntInput, StrInput
-from at.gui.io import FileInput, FileOutput, FolderInput
+from at.gui.io import FolderInput
 from at.gui.label import Label
+from at.gui.line import HLine
 from at.gui.list import ListWidget
-from at.gui.popup import Popup, show_popup
+from at.gui.popup import Popup
 from at.gui.progress import ProgressBar
-from at.gui.status import StatusButton, StatusLabel
+from at.gui.selector import StrSelector
+from at.gui.status import StatusLabel
 from at.gui.utils import *
 from at.gui.worker import run_thread
-from at.io.copyfuncs import batch_copy_file, copy_file
+from at.io.copyfuncs import copy_file
 from at.logger import log
 from at.result import Result
-from at.path import PathEngine
+from at.text import replace_all
+from atktima.auth import licensed
+from atktima.path import paths
+from atktima.sql import db
+from atktima.state import state
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
-
-from atktima.path import paths
-from atktima.state import state
-from atktima.sql import db
-from atktima.auth import auth, licensed
 
 # When setting fixed width to QLineEdit ->
 # -> add alignment=Qt.AlignLeft when adding widget to layout

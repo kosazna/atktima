@@ -1,29 +1,21 @@
 # -*- coding: utf-8 -*-
 import sys
 from typing import Any, Optional, Tuple
-from at.gui.popup import Popup
 
-from at.gui.worker import run_thread
-from at.auth.client import AuthStatus
 from at.gui.console import Console
-from at.gui.progress import ProgressBar
-from at.gui.status import StatusButton
-from at.gui.list import ListWidget
-from at.logger import log
 from at.gui.utils import set_size
+from at.logger import log
+from atktima.auth import auth
+from atktima.gui.count import CountTab
+from atktima.gui.files import FilesTab
+from atktima.gui.settings import SettingsTab
 from atktima.path import paths
+from atktima.sql import db
+from atktima.state import state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,
                              QVBoxLayout, QWidget)
-
-from atktima.gui.settings import SettingsTab
-from atktima.gui.files import FilesTab
-from atktima.gui.count import CountTab
-
-from atktima.state import state
-from atktima.sql import db
-from atktima.auth import auth
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
 log.set_mode("GUI")
