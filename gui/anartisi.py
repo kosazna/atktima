@@ -188,7 +188,7 @@ class AnartisiTab(QWidget):
                    on_result=self.updateResult,
                    on_finish=self.updateFinish)
 
-    @licensed(appname=state['appname'])
+    @licensed(appname=state['appname'], category=state['meleti'])
     def makeAnartisi(self, _progress):
         src = self.apospasmata.getText()
         dst = self.organized.getText()

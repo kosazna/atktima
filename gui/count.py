@@ -164,7 +164,7 @@ class CountTab(QWidget):
             self.widgetMap[xml] = _widget
             self.restLayout.addWidget(_widget)
 
-    @licensed(state['appname'])
+    @licensed(appname=state['appname'], category=state['meleti'])
     def countFiles(self, *args, **kwargs):
         for shape in self.widgetMap:
             self.widgetMap[shape].setText('0')
@@ -204,7 +204,7 @@ class CountTab(QWidget):
         else:
             self.popup.error("Δώσε φάκελο για καταμέτρηση")
 
-    @licensed(state['appname'])
+    @licensed(appname=state['appname'], category=state['meleti'])
     def findMissingFiles(self):
         if self.missingShapes:
             all_otas = db.get_ota_per_meleti(state['meleti'], 'NAMA')

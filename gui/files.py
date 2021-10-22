@@ -221,7 +221,7 @@ class FilesTab(QWidget):
         else:
             log.error("Η φόρτωση ακυρώθηκε")
 
-    @licensed(state['appname'])
+    @licensed(appname=state['appname'], category=state['meleti'])
     def getFilesFromServer(self, _progress):
         server = paths.get_kthmadata(True)
         local = paths.get_localdata(True)
@@ -261,7 +261,7 @@ class FilesTab(QWidget):
         else:
             return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
 
-    @licensed(state['appname'])
+    @licensed(appname=state['appname'], category=state['meleti'])
     def getFilesFromLocal(self, _progress):
         server = Path(self.localFolder.getText())
         local = paths.get_localdata(True)
