@@ -71,17 +71,16 @@ class KtimaUI(QWidget):
 
     @pyqtSlot()
     def onSettingsUpdate(self):
-        meleti_otas = state[state['meleti']]['company']['NAMA']
         self.filesTab.meleti.setText(state['meleti'])
         self.filesTab.fullname.setText(state['fullname'])
         self.filesTab.company.setText(state['company'])
         self.filesTab.shape.clearContent()
         self.filesTab.shape.addItems(db.get_shapes(state['meleti']))
         self.filesTab.otas.clearContent()
-        self.filesTab.otas.addItems(meleti_otas)
+        self.filesTab.otas.addItems(db.get_ota_per_meleti_company(
+            state['meleti'], state['company']))
         # self.filesTab.companyOtaCombo.clearItems()
         # self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
-
         self.countTab.meleti.setText(state['meleti'])
         self.countTab.fullname.setText(state['fullname'])
         self.countTab.company.setText(state['company'])
@@ -92,8 +91,6 @@ class KtimaUI(QWidget):
                         'Other...': ''}
         self.countTab.folder.addItems(path_mapping)
         self.countTab.folder.setCurrentText('LocalData')
-
-        self.countTab.bindActions()
 
     @pyqtSlot(tuple)
     def onServerStatusChanged(self, status):

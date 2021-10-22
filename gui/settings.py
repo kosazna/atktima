@@ -227,9 +227,10 @@ class SettingsTab(QWidget):
         company_changed = self.companyInsert.getText() != state['company']
         if data_changed or temp_changed or mel_changed or fullname_changed or company_changed:
             self.saveButton.enable()
-            self.checkServer()
         else:
             self.saveButton.disable()
+        
+        self.checkServer()
 
     def onMeletiChanged(self):
         self.pickedMeleti = self.meletes.getCurrentText()

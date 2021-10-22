@@ -66,7 +66,27 @@ class KtimaSQL(SQLiteEngine):
 
         return meletes
 
-    def get_ota_per_meleti(self, meleti: str, company: str):
+    def get_meletes(self) -> dict:
+        query = app_queries['select_meletes'].attrs(fetch='rows')
+        meleti_code_name = db.select(query)
+
+        return dict(meleti_code_name)
+
+    def get_companies_per_meleti(self, meleti: str) -> tuple:
+        query = app_queries['select_companies_per_meleti'].attrs(
+            fetch='col').set(meleti=meleti)
+        companies = db.select(query)
+
+        return companies
+
+    def get_ota_per_meleti(self, meleti: str) -> tuple:
+        query = app_queries['select_ota_from_meleti'].attrs(
+            fetch='col').set(meleti=meleti)
+        ota = db.select(query)
+
+        return ota
+
+    def get_ota_per_meleti_company(self, meleti: str, company: str) -> tuple:
         query = app_queries['select_ota_from_meleti_company'].attrs(
             fetch='col').set(meleti=meleti, company=company)
 
@@ -74,7 +94,7 @@ class KtimaSQL(SQLiteEngine):
 
         return meleti_company_ota
 
-    def get_shapes(self, meleti: str, stype='ktima'):
+    def get_shapes(self, meleti: str, stype='ktima') -> tuple:
         query = app_queries['select_shapes'].attrs(
             fetch='col').set(meleti=meleti, type=stype)
         result = self.select(query)
@@ -84,9 +104,8 @@ class KtimaSQL(SQLiteEngine):
 
 db = KtimaSQL(db=paths.get_db(), app_paths=paths)
 
-# print(db.select(app_queries['select_meletes'].attrs(fetch='multirow')))
-# print(db.select(app_queries['select_all_companies'].attrs(fetch='singlecol')))
-# print(db.select(app_queries['select_ota_from_meleti_company'].attrs(
-#     fetch='singlecol').set(meleti="KT2-11", company="NAMA")))
-
-# print(db.get_user_settings())
+# print(db.get_meletes())
+# print(db.get_companies_per_meleti("KT5-16"))
+# print(db.get_ota_per_meleti("KT5-16"))
+# print(db.get_ota_per_meleti_company("KT5-16", 'NAMA'))
+# print(db.get_shapes("KT5-16"))

@@ -58,9 +58,6 @@ class FilesTab(QWidget):
 
         self.serverLoad.clicked.connect(self.onGetFromServer)
         self.localLoad.clicked.connect(self.onGetFromLocal)
-        # self.serverCombo.subscribe(self.serverComboChange)
-        # self.localCombo.subscribe(self.localComboChange)
-        # self.otas.assignLoadFunc(self.loadOtas)
         self.localFolder.lineEdit.textChanged.connect(self.checkLocalFolder)
 
     def setupUi(self, size):
@@ -133,7 +130,8 @@ class FilesTab(QWidget):
         self.localLoad.disable()
         self.checkServer()
         self.shape.addItems(db.get_shapes(state['meleti']))
-        self.otas.addItems(state[state['meleti']]['company']['NAMA'])
+        self.otas.addItems(db.get_ota_per_meleti_company(
+            state['meleti'], state['company']))
         self.shape.hideButtons()
 
         labelLayout.addWidget(self.fullname)
