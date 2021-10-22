@@ -5,6 +5,7 @@ from typing import Callable, Union
 
 import pandas as pd
 from at.io.copyfuncs import copy_file
+from at.result import Result
 
 
 def anartisi(src: Union[str, Path],
@@ -33,27 +34,31 @@ def anartisi(src: Union[str, Path],
         _progress.emit({'pbar_max': len(all_files)})
 
     count = 0
+    no_copy = []
 
-    with ThreadPoolExecutor() as executor:
-        for p in all_files:
+    for p in all_files:
+        filename = p.name
+        stem = p.stem
+        try:
+            folders = mapping.loc[mapping[col_filename] == stem, [
+                col_region, col_page, col_tk]].values.flatten().tolist()
+
+            folders_path = "/".join(folders)
+            final_dir = dst_path.joinpath(folders_path)
+            final_dst = final_dir.joinpath(filename)
+
+            copy_file(p, final_dst, copymode='fast')
             count += 1
-            filename = p.name
-            stem = p.stem
+            if _progress is not None:
+                _progress.emit({'pbar': count})
+        except Exception:
+            no_copy.append(str(p))
 
-            try:
-                folders = mapping.loc[mapping[col_filename] == stem, [
-                    col_region, col_page, col_tk]].values.flatten().tolist()
-
-                folders_path = "/".join(folders)
-                final_dir = dst_path.joinpath(folders_path)
-                final_dst = final_dir.joinpath(filename)
-
-                executor.submit(copy_file, p, final_dst, None, 'fast')
-                if _progress is not None:
-                    _progress.emit({'pbar': count})
-            except Exception:
-                pass
-
-        if _progress is not None:
-            _progress.emit(
-                {'status': "Η διαδικασία τρέχει ακόμα στο παρασκήνιο"})
+    if no_copy:
+        no_copy_files = '\n'.join(no_copy)
+        return Result.warning('Η αντιγραφή αρχείων ολοκληρώθηκε. Κάποια αρχεία δεν αντιγράφηκαν',
+                              details={'secondary': f"Πραγματοποιήθηκε αντιγραφή σε: [{count}]\nΔεν έγινε αντιγραφή (Show Details...)",
+                                       'details': no_copy_files})
+    else:
+        return Result.success('Η αντιγραφή αρχείων ολοκληρώθηκε',
+                              details={'secondary': f"'Πραγματοποιήθηκε αντιγραφή σε: [{count}]"})
