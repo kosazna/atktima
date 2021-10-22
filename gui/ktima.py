@@ -89,6 +89,10 @@ class KtimaUI(QWidget):
         self.countTab.folder.addItems(path_mapping)
         self.countTab.folder.setCurrentText('LocalData')
 
+        self.anartisiTab.meleti.setText(state['meleti'])
+        self.anartisiTab.fullname.setText(state['fullname'])
+        self.anartisiTab.company.setText(state['company'])
+
         self.check_auth()
 
     @pyqtSlot(tuple)

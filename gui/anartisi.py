@@ -199,15 +199,13 @@ class AnartisiTab(QWidget):
         col_page = self.page.getCurrentText()
         col_tk = self.tk.getCurrentText()
 
-        if any([bool(src),
+        if all([bool(src),
                 bool(dst),
                 bool(mapping_file),
                 bool(col_filename),
                 bool(col_region),
                 bool(col_page),
                 bool(col_tk)]):
-            return Result.error("Κάποια από τις κατηγορίες δεν είναι συμπληρωμένη")
-        else:
             return anartisi(src=src,
                             dst=dst,
                             mapping_file=mapping_file,
@@ -216,6 +214,8 @@ class AnartisiTab(QWidget):
                             col_page=col_page,
                             col_tk=col_tk,
                             _progress=_progress)
+        else:
+            return Result.error("Κάποια από τις κατηγορίες δεν είναι συμπληρωμένη")
 
 
 if __name__ == '__main__':
