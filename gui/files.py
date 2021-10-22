@@ -146,7 +146,6 @@ class FilesTab(QWidget):
         buttonLayout.addWidget(self.serverLoad)
         buttonLayout.addWidget(self.localLoad)
         layout.addLayout(buttonLayout)
-        # layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
         layout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
