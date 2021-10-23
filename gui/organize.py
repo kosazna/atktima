@@ -1,40 +1,27 @@
 # -*- coding: utf-8 -*-
-from os import path
 import sys
+from os import path
 from pathlib import Path
 from time import sleep
-from typing import Any, Tuple, Union
+from typing import Any, Optional, Tuple, Union
+
 import pandas as pd
-from atktima.utils.anartisi import anartisi
-from at.auth.utils import load_lic
-from at.gui.line import HLine
 from at.auth.client import Authorize, AuthStatus, licensed
-from at.gui.button import Button
-from at.gui.check import CheckInput
-from at.gui.combo import ComboInput
-from at.gui.console import Console
-from at.gui.filename import FileNameInput
-from at.gui.icons import *
-from at.gui.input import IntInput, StrInput
-from at.gui.io import FileInput, FileOutput, FolderInput
-from at.gui.label import Label
-from at.gui.list import ListWidget
-from at.gui.popup import Popup, show_popup
-from at.gui.progress import ProgressBar
-from at.gui.status import StatusButton, StatusLabel
-from at.gui.utils import *
+from at.auth.utils import load_lic
+from at.gui.components import *
+from at.gui.utils import set_size
 from at.gui.worker import run_thread
 from at.io.copyfuncs import batch_copy_file, copy_file
 from at.logger import log
-from at.result import Result
 from at.path import PathEngine
+from at.result import Result
+from atktima.database import db
+from atktima.path import paths
+from atktima.state import state
+from atktima.utils.anartisi import anartisi
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
-
-from atktima.path import paths
-from atktima.state import state
-from atktima.database import db
 
 # When setting fixed width to QLineEdit ->
 # -> add alignment=Qt.AlignLeft when adding widget to layout

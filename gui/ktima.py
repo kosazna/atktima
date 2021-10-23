@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 import sys
-from typing import Any, Optional, Tuple
+from typing import Optional, Tuple
 
-from at.gui.console import Console
+from at.gui.components import Console
 from at.gui.utils import set_size
 from at.logger import log
 from atktima.auth import auth
+from atktima.database import db
+from atktima.gui.anartisi import AnartisiTab
 from atktima.gui.count import CountTab
 from atktima.gui.files import FilesTab
-from atktima.gui.anartisi import AnartisiTab
-from atktima.gui.settings import SettingsTab
-from atktima.gui.paradosi import ParadosiTab
 from atktima.gui.organize import OrganizeTab
+from atktima.gui.paradosi import ParadosiTab
+from atktima.gui.settings import SettingsTab
 from atktima.path import paths
-from atktima.database import db
 from atktima.state import state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont

@@ -1,28 +1,19 @@
 # -*- coding: utf-8 -*-
 import sys
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 
 from at.auth.client import AuthStatus, licensed
-from at.gui.button import Button
-from at.gui.icons import *
-from at.gui.io import FolderInput
-from at.gui.label import Label
-from at.gui.line import HLine
-from at.gui.list import ListWidget
-from at.gui.popup import Popup
-from at.gui.progress import ProgressBar
-from at.gui.selector import StrSelector
-from at.gui.status import StatusLabel
-from at.gui.utils import *
+from at.gui.components import *
+from at.gui.utils import set_size
 from at.gui.worker import run_thread
 from at.io.copyfuncs import copy_file
 from at.logger import log
 from at.result import Result
 from at.text import replace_all
 from atktima.auth import licensed
-from atktima.path import paths
 from atktima.database import db
+from atktima.path import paths
 from atktima.state import state
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
@@ -55,7 +46,7 @@ class FilesTab(QWidget):
         set_size(widget=self, size=size)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(2,4,2,0)
+        layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
         listLayout = QHBoxLayout()
         buttonLayout = QHBoxLayout()

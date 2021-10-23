@@ -1,23 +1,17 @@
 # -*- coding: utf-8 -*-
 import sys
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 import sip
 from at.auth.client import licensed
-from at.gui.button import Button
-from at.gui.icons import *
-from at.gui.label import Label
-from at.gui.line import HLine
-from at.gui.popup import Popup
-from at.gui.selector import PathSelector
-from at.gui.status import StatusLabel
-from at.gui.utils import *
+from at.gui.components import *
+from at.gui.utils import HORIZONTAL, VERTICAL, set_size
 from at.logger import log
 from at.utils import file_counter
 from atktima.auth import licensed
-from atktima.path import paths
 from atktima.database import db
+from atktima.path import paths
 from atktima.state import state
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
