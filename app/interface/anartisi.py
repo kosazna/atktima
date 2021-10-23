@@ -9,9 +9,8 @@ from at.gui.components import *
 from at.gui.utils import HORIZONTAL, VERTICAL, set_size
 from at.gui.worker import run_thread
 from at.result import Result
-from atktima.path import paths
-from atktima.state import state
-from atktima.utils.anartisi import anartisi
+from atktima.app.utils import state, paths
+from atktima.app.core import anartisi
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget

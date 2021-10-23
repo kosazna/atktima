@@ -6,8 +6,8 @@ from at.gui.utils import get_dpi
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QApplication
 
-from atktima.app.ktima import KtimaUI
-from atktima.settings import *
+from atktima.app.interface import KtimaUI
+from atktima.app.settings import *
 
 if __name__ == "__main__":
 

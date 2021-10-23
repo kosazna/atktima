@@ -9,10 +9,7 @@ from at.gui.components import *
 from at.gui.utils import HORIZONTAL, VERTICAL, set_size
 from at.logger import log
 from at.utils import file_counter
-from atktima.auth import licensed
-from atktima.database import db
-from atktima.path import paths
-from atktima.state import state
+from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
@@ -43,7 +40,7 @@ class CountTab(QWidget):
         set_size(widget=self, size=size)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(2,4,2,0)
+        layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
         countLayout = QHBoxLayout()
         self.shapeLayout = QVBoxLayout()

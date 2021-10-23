@@ -5,16 +5,13 @@ from typing import Optional, Tuple
 from at.gui.components import Console
 from at.gui.utils import set_size
 from at.logger import log
-from atktima.app.anartisi import AnartisiTab
-from atktima.app.count import CountTab
-from atktima.app.files import FilesTab
-from atktima.app.organize import OrganizeTab
-from atktima.app.paradosi import ParadosiTab
-from atktima.app.settings import SettingsTab
-from atktima.auth import auth
-from atktima.database import db
-from atktima.path import paths
-from atktima.state import state
+from atktima.app.interface.anartisi import AnartisiTab
+from atktima.app.interface.count import CountTab
+from atktima.app.interface.files import FilesTab
+from atktima.app.interface.organize import OrganizeTab
+from atktima.app.interface.paradosi import ParadosiTab
+from atktima.app.interface.settings import SettingsTab
+from atktima.app.utils import auth, db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,

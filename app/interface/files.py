@@ -11,10 +11,7 @@ from at.io.copyfuncs import copy_file
 from at.logger import log
 from at.result import Result
 from at.text import replace_all
-from atktima.auth import licensed
-from atktima.database import db
-from atktima.path import paths
-from atktima.state import state
+from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget

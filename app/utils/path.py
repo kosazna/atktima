@@ -3,7 +3,7 @@
 from typing import Optional
 from at.path import PathEngine
 from pathlib import Path
-from atktima.settings import *
+from atktima.app.settings import *
 
 
 class KtimaPaths(PathEngine):

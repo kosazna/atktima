@@ -15,10 +15,7 @@ from at.io.copyfuncs import batch_copy_file, copy_file
 from at.logger import log
 from at.path import PathEngine
 from at.result import Result
-from atktima.database import db
-from atktima.path import paths
-from atktima.state import state
-from atktima.utils.anartisi import anartisi
+from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
