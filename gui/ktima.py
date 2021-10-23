@@ -13,7 +13,7 @@ from atktima.gui.settings import SettingsTab
 from atktima.gui.paradosi import ParadosiTab
 from atktima.gui.organize import OrganizeTab
 from atktima.path import paths
-from atktima.sql import db
+from atktima.database import db
 from atktima.state import state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont

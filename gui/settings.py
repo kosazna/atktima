@@ -33,7 +33,7 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 
 from atktima.path import paths
 from atktima.state import state
-from atktima.sql import db
+from atktima.database import db
 
 # When setting fixed width to QLineEdit ->
 # -> add alignment=Qt.AlignLeft when adding widget to layout

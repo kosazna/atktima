@@ -22,7 +22,7 @@ from at.result import Result
 from at.text import replace_all
 from atktima.auth import licensed
 from atktima.path import paths
-from atktima.sql import db
+from atktima.database import db
 from atktima.state import state
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont

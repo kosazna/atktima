@@ -3,9 +3,9 @@
 from pathlib import Path
 from typing import List, Union
 from atktima.path import paths
-from at.sql.utils import load_app_queries
-from at.sql.object import QueryObject
-from at.sql.sqlite import SQLiteEngine
+from at.database.utils import load_app_queries
+from at.database.object import QueryObject
+from at.database.sqlite import SQLiteEngine
 from at.state import State
 from at.utils import user
 
