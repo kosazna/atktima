@@ -11,8 +11,8 @@ from atktima.app.settings import *
 
 if __name__ == "__main__":
 
-    myappid = 'com.aztool.atktima.app'
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    appid = 'com.aztool.atktima.app'
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
 
     if get_dpi() < 120:
         SEGOE = QFont(FONT, FONTSIZE)
