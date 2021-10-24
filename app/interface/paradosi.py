@@ -42,8 +42,11 @@ class ParadosiTab(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
-        checksLayout = QVBoxLayout()
+        mdbLayout = QHBoxLayout()
+        checksLayout = QHBoxLayout()
         metadataLayout = QHBoxLayout()
+        listLayout = QHBoxLayout()
+        buttonLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
                               label=state['fullname'],
@@ -60,27 +63,16 @@ class ParadosiTab(QWidget):
 
         path_mapping = {'LocalData': paths.get_localdata(),
                         'ParadosiData': paths.get_paradosidata()}
-        self.shapeFolder = PathSelector(label="Φάκελος Χωρικών",
-                                        selectortype='folder_in',
-                                        mapping=path_mapping,
-                                        orientation=VERTICAL,
-                                        combosize=(180, 24),
-                                        labelsize=(None, 24),
-                                        parent=self)
 
-        self.mdbFolder = FolderInput(label="Φάκελος Βάσεων",
-                                     orientation=VERTICAL,
-                                     labelsize=(None, 24),
+        self.mdbFolder = FolderInput(label="Βάσεις",
                                      parent=self)
         self.checkMdbOrganized = CheckInput(label="Οργανωμένες",
-                                            checked=True,
+                                            checked=False,
                                             parent=self)
-
         self.checkMetadata = CheckInput(label="Metadata",
                                         checked=False,
                                         parent=self)
-        self.dateMetadata = StrInput(label="Ημερομηνία",
-                                     labelsize=(100, 24),
+        self.dateMetadata = StrInput(labelsize=(100, 24),
                                      editsize=(150, 24),
                                      parent=self)
 
@@ -88,6 +80,7 @@ class ParadosiTab(QWidget):
                                            checked=False,
                                            parent=self)
 
+        path_mapping = {'ParadosiData': paths.get_paradosidata()}
         self.folderOutput = PathSelector(label="Φάκελος που θα δημιουργηθεί η παράδοση",
                                          selectortype='folder_in',
                                          mapping=path_mapping,
@@ -96,7 +89,25 @@ class ParadosiTab(QWidget):
                                          labelsize=(None, 24),
                                          parent=self)
 
+        self.shape = ListWidget(label="Επιλογή αρχείων",
+                                parent=self)
+        self.otas = ListWidget(label="Επιλογή ΟΤΑ",
+                               parent=self)
+
+        self.makeAll = Button("Δημιουργία Παράδοσης",
+                                 color='blue',
+                                 size=(150, 30),
+                                 parent=self)
+
+        self.progress = ProgressBar(parent=self)
+
         self.dateMetadata.setPlaceholder("dd/mm/yyyy")
+        self.folderOutput.setCurrentText("ParadosiData")
+        self.shape.addItems(db.get_shapes(state['meleti']))
+        self.otas.addItems(db.get_ota_per_meleti_company(
+            state['meleti'], state['company']))
+        self.shape.hideButtons()
+        self.otas.hideButtons()
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -104,17 +115,27 @@ class ParadosiTab(QWidget):
         labelLayout.addWidget(self.meleti)
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
-        layout.addWidget(self.shapeFolder)
-        layout.addWidget(self.mdbFolder)
+        mdbLayout.addWidget(self.mdbFolder)
+        mdbLayout.addWidget(self.checkMdbOrganized)
+        layout.addLayout(mdbLayout)
         layout.addWidget(HLine())
-        checksLayout.addWidget(self.checkMdbOrganized)
+
+        listLayout.addWidget(self.shape)
+        listLayout.addWidget(self.otas)
+        layout.addLayout(listLayout)
+        layout.addWidget(HLine())
         checksLayout.addWidget(self.checkEmptyShapes)
         metadataLayout.addWidget(self.checkMetadata)
-        metadataLayout.addWidget(self.dateMetadata, stretch=2, alignment=Qt.AlignLeft)
+        metadataLayout.addWidget(
+            self.dateMetadata, stretch=2, alignment=Qt.AlignLeft)
+        checksLayout.addLayout(metadataLayout)
         layout.addLayout(checksLayout)
-        layout.addLayout(metadataLayout)
         layout.addWidget(self.folderOutput)
+        layout.addWidget(HLine())
+        buttonLayout.addWidget(self.makeAll)
+        layout.addLayout(buttonLayout)
         layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
+        layout.addWidget(self.progress)
 
         self.setLayout(layout)
 

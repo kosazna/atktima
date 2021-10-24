@@ -12,6 +12,7 @@ from at.logger import log
 from at.result import Result
 from at.text import replace_all
 from atktima.app.utils import db, paths, state
+from atktima.app.core import get_shapes
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
@@ -113,6 +114,7 @@ class FilesTab(QWidget):
         self.otas.addItems(db.get_ota_per_meleti_company(
             state['meleti'], state['company']))
         self.shape.hideButtons()
+        self.otas.hideButtons()
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -221,31 +223,13 @@ class FilesTab(QWidget):
         user_otas = self.otas.getCheckState()
 
         if user_otas and user_shapes:
-            _progress.emit({'pbar_max': len(user_otas)})
-            ota_counter = 0
-            file_counter = 0
-            for ota in user_otas:
-                ota_counter += 1
-                for shape in user_shapes:
-                    if shape == 'VSTEAS_REL':
-                        pass
-                    else:
-                        sub_server = replace_all(server_structure,
-                                                 {'shape': shape, 'ota': ota})
-                        sub_local = replace_all(local_structure,
-                                                {'shape': shape, 'ota': ota})
-                        _src = server.joinpath(f"{sub_server}/{shape}.shp")
-                        _dst = local.joinpath(f"{sub_local}/{shape}.shp")
-
-                        copied = copy_file(_src, _dst)
-                        if copied:
-                            file_counter += 1
-                _progress.emit({'pbar': ota_counter})
-
-            if file_counter:
-                return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
-                                      details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
-            return Result.warning("Δεν έγινε αντιγραφή για κανένα αρχείο")
+            return get_shapes(src=server,
+                              dst=local,
+                              otas=user_otas,
+                              shapes=user_shapes,
+                              server_schema=server_structure,
+                              local_schema=local_structure,
+                              _progress=_progress)
         else:
             return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
 
@@ -264,33 +248,13 @@ class FilesTab(QWidget):
         user_otas = self.otas.getCheckState()
 
         if user_otas and user_shapes:
-            _progress.emit({'pbar_max': len(user_otas)})
-            ota_counter = 0
-            file_counter = 0
-            for ota in user_otas:
-                ota_counter += 1
-                for shape in user_shapes:
-                    sub_server = replace_all(server_structure,
-                                             {'shape': shape, 'ota': ota})
-                    sub_local = replace_all(local_structure,
-                                            {'shape': shape, 'ota': ota})
-
-                    if shape == 'VSTEAS_REL':
-                        _src = server.joinpath(f"{sub_server}/{shape}.mdb")
-                        _dst = local.joinpath(f"{sub_local}/{shape}.mdb")
-                    else:
-                        _src = server.joinpath(f"{sub_server}/{shape}.shp")
-                        _dst = local.joinpath(f"{sub_local}/{shape}.shp")
-
-                    copied = copy_file(_src, _dst)
-                    if copied:
-                        file_counter += 1
-                _progress.emit({'pbar': ota_counter})
-
-            if file_counter:
-                return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
-                                      details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
-            return Result.warning("Δεν έγινε αντιγραφή για κανένα αρχείο")
+            return get_shapes(src=server,
+                              dst=local,
+                              otas=user_otas,
+                              shapes=user_shapes,
+                              server_schema=server_structure,
+                              local_schema=local_structure,
+                              _progress=_progress)
         else:
             return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
 

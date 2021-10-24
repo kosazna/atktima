@@ -94,12 +94,14 @@ class KtimaSQL(SQLiteEngine):
 
         return meleti_company_ota
 
-    def get_shapes(self, meleti: str, stype='ktima') -> tuple:
+    def get_shapes(self, meleti: str, stype='ktima', mdb: bool = False) -> tuple:
         query = app_queries['select_shapes'].attrs(
             fetch='col').set(meleti=meleti, type=stype)
         result = self.select(query)
 
-        return result
+        if mdb:
+            return result
+        return tuple([sh for sh in result if sh != 'VSTEAS_REL'])
 
 
 db = KtimaSQL(db=paths.get_db(), app_paths=paths)
