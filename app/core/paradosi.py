@@ -51,7 +51,6 @@ def get_unorganized_server_files(src: Union[str, Path],
                                  otas: Iterable[str],
                                  local_schema: str,
                                  _progress: Optional[Callable] = None) -> Result:
-
     src_path = Path(src)
     dst_path = Path(dst)
 
@@ -78,3 +77,24 @@ def get_unorganized_server_files(src: Union[str, Path],
                 copy_file(p, _dst, save_name='VSTEAS_REL')
             else:
                 zip_file(p, zip_dst)
+
+
+def create_empty_shapes(src: Union[str, Path],
+                        dst: Union[str, Path],
+                        otas: Iterable[str],
+                        meleti_shapes: Iterable[str],
+                        local_schema: str,
+                        _progress: Optional[Callable] = None) -> Result:
+    src_path = Path(src)
+    dst_path = Path(dst)
+
+    for p in src_path.glob('*.shp'):
+        filename = p.stem
+
+        if filename in meleti_shapes:
+            for ota in otas:
+                sub_dst = replace_all(local_schema, {'shape': filename,
+                                                     'ota': ota})
+                _dst = dst_path.joinpath(f"{sub_dst}/{filename}.shp")
+                if not _dst.exists():
+                    copy_file(p, _dst)
