@@ -85,7 +85,7 @@ class CountTab(QWidget):
 
         self.folder.setCurrentText('LocalData')
 
-        for shape in db.get_shapes(state['meleti']):
+        for shape in db.get_shapes(state['meleti'], mdb=True):
             if shape != 'VSTEAS_REL':
                 _widget = StatusLabel(label=shape, status='0',
                                       labelsize=(100, 18),
@@ -135,7 +135,7 @@ class CountTab(QWidget):
 
         self.widgetMap = {}
 
-        for shape in db.get_shapes(state['meleti']):
+        for shape in db.get_shapes(state['meleti'], mdb=True):
             if shape != 'VSTEAS_REL':
                 _widget = StatusLabel(label=shape, status='0',
                                       labelsize=(100, 18),
