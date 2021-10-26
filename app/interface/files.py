@@ -11,8 +11,9 @@ from at.io.copyfuncs import copy_file
 from at.logger import log
 from at.result import Result
 from at.text import replace_all
-from atktima.app.utils import db, paths, state
 from atktima.app.core import get_shapes
+from atktima.app.settings import *
+from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
@@ -84,17 +85,11 @@ class FilesTab(QWidget):
         #                                      'Άλλο...'],
         #                               combosize=(200, 24),
         #                               parent=self)
-        server_mapping = {"NAMA Server": '<ota>/SHP',
-                          "2KP Server": '<ota>/SHP/<shape>',
-                          "Άλλη παράδοση (ktimaOld}": '<ota>/SHAPE/<shape>',
-                          "Άλλη παράδοση (ktima16}": '<ota>/<shape>'}
         self.serverWidget = StrSelector(label="Δομή Εισαγωγής",
                                         mapping=server_mapping,
                                         labelsize=(100, 24),
                                         combosize=(180, 24),
                                         parent=self)
-        local_mapping = {"ktima16": '<ota>/<shape>',
-                         "ktimaOld": '<ota>/SHAPE/<shape>'}
         self.localWidget = StrSelector(label="Δομή Τοπικά",
                                        mapping=local_mapping,
                                        labelsize=(100, 24),
