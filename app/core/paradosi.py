@@ -105,7 +105,7 @@ def create_metadata(src: Union[str, Path],
                     dst: Union[str, Path],
                     date: str,
                     otas: Iterable[str],
-                    local_schema: str,
+                    metadata_schema: str,
                     _progress: Optional[Callable] = None) -> Result:
     src_path = Path(src)
     dst_path = Path(dst)
@@ -119,7 +119,7 @@ def create_metadata(src: Union[str, Path],
         metadatas[filename] = p.read_text(encoding='utf-8-sig')
 
     for ota in otas:
-        sub_dst = replace_all(local_schema, {'ota': ota})
+        sub_dst = replace_all(metadata_schema, {'ota': ota})
         _dst = dst_path.joinpath(sub_dst)
         _dst.mkdir(parents=True, exist_ok=True)
 

@@ -18,3 +18,6 @@ server_mapping = {"NAMA Server": '<ota>/SHP',
 
 local_mapping = {"ktima16": '<ota>/<shape>',
                  "ktima11": '<ota>/SHAPE/<shape>'}
+
+metadata_mapping = {"ktima16": '<ota>',
+                    "ktima11": '<ota>/METADATA'}
