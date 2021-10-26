@@ -3,10 +3,10 @@ from pathlib import Path
 from typing import Callable, Iterable, Optional, Union
 
 from at.io.copyfuncs import copy_file
-from at.result import Result
-from atktima.app.settings import *
-from at.text import replace_all
 from at.io.utils import zip_file
+from at.result import Result
+from at.text import replace_all
+from atktima.app.settings import *
 
 
 def get_organized_server_files(src: Union[str, Path],
@@ -72,8 +72,8 @@ def get_unorganized_server_files(src: Union[str, Path],
                 _dst = other_dst.joinpath('GEITONES')
                 copy_file(p, _dst)
             elif 'VSTEAS_REL' in filename:
-                sub_dst = replace_all(local_schema,  {'shape': "VSTEAS_REL",
-                                                      'ota': ota})
+                sub_dst = replace_all(local_schema, {'shape': "VSTEAS_REL",
+                                                     'ota': ota})
                 _dst = spatial_dst.joinpath(sub_dst)
                 copy_file(p, _dst, save_name='VSTEAS_REL')
             else:
