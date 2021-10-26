@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from typing import Callable, Iterable, Union
+from typing import Callable, Iterable, Optional, Union
 
 from at.io.copyfuncs import copy_file
 from at.result import Result
@@ -13,11 +13,12 @@ def get_shapes(src: Union[str, Path],
                shapes: Iterable[str],
                server_schema: str,
                local_schema: str,
-               _progress: Callable) -> Result:
+               _progress: Optional[Callable] = None) -> Result:
     src_path = Path(src)
     dst_path = Path(dst)
 
-    _progress.emit({'pbar_max': len(otas)})
+    if _progress is not None:
+        _progress.emit({'pbar_max': len(otas)})
 
     ota_counter = 0
     file_counter = 0
@@ -40,7 +41,8 @@ def get_shapes(src: Union[str, Path],
             if copied:
                 file_counter += 1
 
-        _progress.emit({'pbar': ota_counter})
+        if _progress is not None:
+            _progress.emit({'pbar': ota_counter})
 
     if file_counter:
         return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",

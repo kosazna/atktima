@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from pathlib import Path
 from typing import Callable, Iterable, Optional, Union
 
@@ -98,3 +99,34 @@ def create_empty_shapes(src: Union[str, Path],
                 _dst = dst_path.joinpath(f"{sub_dst}/{filename}.shp")
                 if not _dst.exists():
                     copy_file(p, _dst)
+
+
+def create_metadata(src: Union[str, Path],
+                    dst: Union[str, Path],
+                    date: str,
+                    otas: Iterable[str],
+                    local_schema: str,
+                    _progress: Optional[Callable] = None) -> Result:
+    src_path = Path(src)
+    dst_path = Path(dst)
+
+    ota_re = re.compile(r'(<CODE_OKXE>)(\d*)(</CODE_OKXE>)')
+    date_re = re.compile(r'(<DeliveryDate>)(\d*/\d*/\d*)(</DeliveryDate>)')
+
+    metadatas = {}
+    for p in src_path.glob('*.xml'):
+        filename = p.stem
+        metadatas[filename] = p.read_text(encoding='utf-8-sig')
+
+    for ota in otas:
+        sub_dst = replace_all(local_schema, {'ota': ota})
+        _dst = dst_path.joinpath(sub_dst)
+        _dst.mkdir(parents=True, exist_ok=True)
+
+        for metadata in metadatas:
+            _meta = metadatas[metadata]
+            _meta = ota_re.sub(f'\g<1>{ota}\g<3>', _meta)
+            _meta = date_re.sub(f'\g<1>{date}\g<3>', _meta)
+
+            _dst.joinpath(f"{metadata}.xml").write_text(_meta,
+                                                        encoding='utf-8-sig')

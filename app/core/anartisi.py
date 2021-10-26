@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import pandas as pd
 from at.io.copyfuncs import copy_file
@@ -14,7 +14,7 @@ def anartisi(src: Union[str, Path],
              col_region: str,
              col_page: str,
              col_tk: str,
-             _progress: Callable):
+             _progress: Optional[Callable] = None):
 
     src_path = Path(src)
     dst_path = Path(dst)
