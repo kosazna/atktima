@@ -264,7 +264,8 @@ class FilesTab(QWidget):
                               local_schema=local_structure,
                               _progress=_progress)
         else:
-            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
+            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία',
+                                  details={'secondary': 'Επέλεξε χωρικά και ΟΤΑ'})
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def getFilesFromLocal(self, _progress):
@@ -289,7 +290,8 @@ class FilesTab(QWidget):
                               local_schema=local_structure,
                               _progress=_progress)
         else:
-            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
+            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία:',
+                                  details={'secondary': 'Επέλεξε χωρικά και ΟΤΑ'})
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def deleteFiles(self, _progress):
