@@ -208,40 +208,53 @@ class ParadosiTab(QWidget):
         probs = []
 
         if funcname == 'loadSpatial':
-            if not paradosi_folder or Path(paradosi_folder).exists():
-                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not paradosi_folder or not Path(paradosi_folder).exists():
+                probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
             if not paradosi_structure:
-                probs.append("Δεν βρέθηκε δομή παράδοσης")
+                probs.append("-Δεν βρέθηκε δομή παράδοσης")
             if not user_shapes:
-                probs.append("Δεν βρέθηκε επιλογή χωρικών")
+                probs.append("-Δεν βρέθηκε επιλογή χωρικών")
             if not user_otas:
-                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
         elif funcname == 'loadMdbs-organized':
-            if not paradosi_folder or Path(paradosi_folder).exists():
-                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not paradosi_folder or not Path(paradosi_folder).exists():
+                probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
             if not mdb_folder or Path(mdb_folder).exists():
-                probs.append("Δεν βρέθηκε φάκελος βάσεων")
+                probs.append("-Δεν βρέθηκε φάκελος βάσεων")
             if not user_otas:
-                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
         elif funcname == 'loadMdbs-unorganized':
-            if not paradosi_folder or Path(paradosi_folder).exists():
-                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not paradosi_folder or not Path(paradosi_folder).exists():
+                probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
             if not mdb_folder or Path(mdb_folder).exists():
-                probs.append("Δεν βρέθηκε φάκελος βάσεων")
+                probs.append("-Δεν βρέθηκε φάκελος βάσεων")
             if not paradosi_structure:
-                probs.append("Δεν βρέθηκε δομή παράδοσης")
+                probs.append("-Δεν βρέθηκε δομή παράδοσης")
             if not user_otas:
-                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
         elif funcname in ['loadEmpty', 'loadMetadata']:
-            if not paradosi_folder or Path(paradosi_folder).exists():
-                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not paradosi_folder or not Path(paradosi_folder).exists():
+                probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
             if not paradosi_structure:
-                probs.append("Δεν βρέθηκε δομή παράδοσης")
+                probs.append("-Δεν βρέθηκε δομή παράδοσης")
             if not user_otas:
-                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
+        else:
+            if not paradosi_folder or not Path(paradosi_folder).exists():
+                probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
+            if not paradosi_structure:
+                probs.append("-Δεν βρέθηκε δομή παράδοσης")
+            if not mdb_folder or Path(mdb_folder).exists():
+                probs.append("-Δεν βρέθηκε φάκελος βάσεων")
+            if not user_shapes:
+                probs.append("-Δεν βρέθηκε επιλογή χωρικών")
+            if not user_otas:
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
 
         if probs:
-            return '\n'.join(probs)
+            details = '\n'.join(probs)
+            return Result.warning('Προσδιόρισε όλες τις απαραίτητες παραμέτρους',
+                                  details={'secondary': details})
         return None
 
     def onMakeAll(self):
@@ -250,7 +263,7 @@ class ParadosiTab(QWidget):
                           on_update=self.updateProgress,
                           on_result=self.updateResult,
                           on_finish=self.updateFinish)
-    
+
     def onMakeSpatial(self):
         return run_thread(threadpool=self.threadpool,
                           function=self.loadSpatial,
@@ -264,6 +277,7 @@ class ParadosiTab(QWidget):
                           on_update=self.updateProgress,
                           on_result=self.updateResult,
                           on_finish=self.updateFinish)
+
     def onMakeEmpty(self):
         return run_thread(threadpool=self.threadpool,
                           function=self.loadEmpty,
@@ -285,6 +299,10 @@ class ParadosiTab(QWidget):
                    'loadEmpty': None,
                    'loadMetadata': None}
 
+        validation = self.validate('loadSpatial')
+        if validation is not None:
+            return validation
+
         actions['loadSpatial'] = self.loadSpatial(_progress)
         actions['loadMdbs'] = self.loadMdbs(_progress)
         actions['loadEmpty'] = self.loadEmpty(_progress)
@@ -304,8 +322,7 @@ class ParadosiTab(QWidget):
 
         validation = self.validate('loadSpatial')
         if validation is not None:
-            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία',
-                                  details={'secondary': validation})
+            return validation
 
         return get_shapes(src=local_folder,
                           dst=paradosi_folder,
@@ -324,11 +341,17 @@ class ParadosiTab(QWidget):
         paradosi_structure = self.selectorSpatial.getText()
 
         if are_organized:
+            validation = self.validate('loadMdbs-organized')
+            if validation is not None:
+                return validation
             return get_organized_server_files(src=mdb_folder,
                                               dst=paradosi_folder,
                                               otas=user_otas,
                                               _progress=_progress)
         else:
+            validation = self.validate('loadMdbs-unorganized')
+            if validation is not None:
+                return validation
             return get_unorganized_server_files(src=mdb_folder,
                                                 dst=paradosi_folder,
                                                 otas=user_otas,
@@ -343,6 +366,10 @@ class ParadosiTab(QWidget):
         shapes = db.get_shapes(state['meleti'])
         paradosi_structure = self.selectorSpatial.getText()
 
+        validation = self.validate('loadEmpty')
+        if validation is not None:
+            return validation
+
         return create_empty_shapes(src=empty_folder,
                                    dst=paradosi_folder,
                                    otas=user_otas,
@@ -356,6 +383,10 @@ class ParadosiTab(QWidget):
         paradosi_folder = self.folderOutput.getText()
         user_otas = self.otas.getCheckState()
         paradosi_structure = self.selectorSpatial.getText()
+
+        validation = self.validate('loadMetadata')
+        if validation is not None:
+            return validation
 
         return create_empty_shapes(src=metadata_folder,
                                    dst=paradosi_folder,
