@@ -40,8 +40,9 @@ class FilesTab(QWidget):
 
         self.filesCopied = False
 
-        self.serverLoad.clicked.connect(self.onGetFromServer)
-        self.localLoad.clicked.connect(self.onGetFromLocal)
+        self.serverLoad.subscribe(self.onGetFromServer)
+        self.localLoad.subscribe(self.onGetFromLocal)
+        self.deleteButton.subscribe(self.onDelete)
         self.localFolder.lineEdit.textChanged.connect(self.checkLocalFolder)
 
     def setupUi(self, size):
@@ -73,7 +74,7 @@ class FilesTab(QWidget):
                           fontsize=10,
                           italic=True,
                           parent=self)
-        self.shape = ListWidget(label="Επιλογή αρχείων",
+        self.shape = ListWidget(label="Επιλογή Χωρικών",
                                 parent=self)
         self.otas = ListWidget(label="Επιλογή ΟΤΑ",
                                parent=self)
@@ -102,8 +103,13 @@ class FilesTab(QWidget):
         self.localLoad = Button("Φόρτωση από Φάκελο",
                                 size=(180, 30),
                                 parent=self)
+        self.deleteButton = Button("Διαγραφή αρχείων",
+                                   color='red',
+                                   size=(200, 30),
+                                   parent=self)
 
         self.progress = ProgressBar(parent=self)
+
         serverWidgetKey = f"{state['company']} Server"
         self.serverWidget.setCurrentText(serverWidgetKey)
         localWidgetKey = state[state['meleti']]['type']
@@ -136,6 +142,7 @@ class FilesTab(QWidget):
         buttonLayout.addWidget(self.serverLoad)
         buttonLayout.addWidget(self.localLoad)
         layout.addLayout(buttonLayout)
+        layout.addWidget(self.deleteButton, alignment=Qt.AlignCenter)
         layout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
@@ -208,13 +215,34 @@ class FilesTab(QWidget):
         result = self.popup.info("Η δομή server είναι σωστή?",
                                  buttons=['yes', 'no'])
         if result == 'yes':
-            run_thread(threadpool=self.threadpool,
-                       function=self.getFilesFromLocal,
-                       on_update=self.updateProgress,
-                       on_result=self.updateResult,
-                       on_finish=self.updateFinish)
+            return run_thread(threadpool=self.threadpool,
+                              function=self.getFilesFromLocal,
+                              on_update=self.updateProgress,
+                              on_result=self.updateResult,
+                              on_finish=self.updateFinish)
         else:
             log.error("Η φόρτωση ακυρώθηκε")
+
+    def onDelete(self):
+        folder = self.localFolder.getText()
+
+        if folder:
+            _folder = folder
+        else:
+            _folder = paths.get_localdata()
+
+        result = self.popup.warning("Διαγραφή επιλεγμένων αρχείων απο φάκελο:",
+                                    secondary=_folder,
+                                    buttons=['yes', 'no'])
+
+        if result == 'yes':
+            return run_thread(threadpool=self.threadpool,
+                              function=self.getFilesFromLocal,
+                              on_update=self.updateProgress,
+                              on_result=self.updateResult,
+                              on_finish=self.updateFinish)
+        else:
+            log.error("Η διαγραφή ακυρώθηκε")
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def getFilesFromServer(self, _progress):
@@ -262,6 +290,21 @@ class FilesTab(QWidget):
                               _progress=_progress)
         else:
             return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def deleteFiles(self, _progress):
+        user_shapes = self.shape.getCheckState()
+
+        folder = self.localFolder.getText()
+
+        if folder:
+            _folder = Path(folder)
+        else:
+            _folder = paths.get_localdata(True)
+
+        for shape in user_shapes:
+            for p in _folder.glob(shape):
+                p.unlink(missing_ok=True)
 
 
 if __name__ == '__main__':
