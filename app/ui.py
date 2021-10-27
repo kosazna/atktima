@@ -5,13 +5,14 @@ from typing import Optional, Tuple
 from at.gui.components import Console
 from at.gui.utils import set_size
 from at.logger import log
-from atktima.app.interface import (AnartisiTab, CountTab, FilesTab,
+from atktima.app.interface import (AnartisiTab, CountTab, FilesTab, MiscTab,
                                    OrganizeTab, ParadosiTab, SettingsTab)
 from atktima.app.utils import auth, db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,
                              QVBoxLayout, QWidget)
+
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
 log.set_mode("GUI")
@@ -51,12 +52,14 @@ class KtimaUI(QWidget):
         self.tabs.addTab(self.filesTab, "Ενημέρωση")
         self.countTab = CountTab(size=(700, None), parent=self)
         self.tabs.addTab(self.countTab, "Καταμέτρηση")
-        self.organizeTab = OrganizeTab(size=(700, None), parent=self)
-        self.tabs.addTab(self.organizeTab, "Οργάνωση")
         self.paradosiTab = ParadosiTab(size=(700, None), parent=self)
         self.tabs.addTab(self.paradosiTab, "Παράδοση")
         self.anartisiTab = AnartisiTab(size=(700, None), parent=self)
         self.tabs.addTab(self.anartisiTab, "Ανάρτηση")
+        self.organizeTab = OrganizeTab(size=(700, None), parent=self)
+        self.tabs.addTab(self.organizeTab, "Οργάνωση")
+        self.miscTab = MiscTab(size=(700, None), parent=self)
+        self.tabs.addTab(self.miscTab, "Διάφορα")
 
         self.appLayout.addWidget(self.tabs)
         self.appLayout.addWidget(self.console)

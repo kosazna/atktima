@@ -24,7 +24,7 @@ if __name__ == "__main__":
     app.setFont(SEGOE)
     app.setStyle('Fusion')
 
-    ui = KtimaUI(size=(None, 600))
+    ui = KtimaUI(size=(None, 650))
     ui.show()
 
     sys.exit(app.exec_())

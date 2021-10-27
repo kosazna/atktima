@@ -9,12 +9,13 @@ import pandas as pd
 from at.auth.client import Authorize, AuthStatus, licensed
 from at.auth.utils import load_lic
 from at.gui.components import *
-from at.gui.utils import set_size
+from at.gui.utils import VERTICAL, set_size
 from at.gui.worker import run_thread
-from at.io.copyfuncs import batch_copy_file, copy_file
+from at.io.copyfuncs import copy_pattern
 from at.logger import log
 from at.path import PathEngine
 from at.result import Result
+from at.text import parse_filters
 from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -60,8 +61,11 @@ class OrganizeTab(QWidget):
                             label=state['meleti'],
                             parent=self)
 
-        self.inputFolder = FolderInput(label="Εύρεση σε",
-                                       parent=self)
+        self.inputFolder = PathSelector(label="Εύρεση σε",
+                                        labelsize=(180, 24),
+                                        mapping={},
+                                        orientation=VERTICAL,
+                                        parent=self)
         self.inputPattern = StrSelector(label="Δομή",
                                         combosize=(200, 24),
                                         editsize=(300, 24),
@@ -69,17 +73,19 @@ class OrganizeTab(QWidget):
         self.inputFilters = StrInput("Φίλτρα")
         self.checkRecursive = CheckInput("Εύρεση σε υποφακέλους")
 
-        self.ouputFolder = FolderInput(label="Απόθεση σε",
-                                       parent=self)
+        self.ouputFolder = PathSelector(label="Απόθεση σε",
+                                        labelsize=(180, 24),
+                                        mapping={},
+                                        orientation=VERTICAL,
+                                        parent=self)
         self.outputPattern = StrSelector(label="Δομή",
                                          combosize=(200, 24),
                                          editsize=(300, 24),
                                          parent=self)
+        self.outputName = StrInput(label="Με όνομα",
+                                   parent=self)
 
         self.buttonCopy = Button(label='Αντιγραφή',
-                                 size=(180, 30),
-                                 parent=self)
-        self.buttonMake = Button(label='Δημιουργία',
                                  size=(180, 30),
                                  parent=self)
         self.status = StatusButton(parent=self)
@@ -91,22 +97,42 @@ class OrganizeTab(QWidget):
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
         inputLayout.addWidget(self.inputFolder)
-        inputLayout.addWidget(self.inputPattern)
         inputFilterLayout.addWidget(self.inputFilters)
         inputFilterLayout.addWidget(self.checkRecursive)
         inputLayout.addLayout(inputFilterLayout)
+        inputLayout.addWidget(self.inputPattern)
         layout.addLayout(inputLayout)
         layout.addWidget(HLine())
         outputLayout.addWidget(self.ouputFolder)
+        outputLayout.addWidget(self.outputName)
         outputLayout.addWidget(self.outputPattern)
         layout.addLayout(outputLayout)
         layout.addWidget(HLine())
         buttonLayout.addWidget(self.buttonCopy)
-        buttonLayout.addWidget(self.buttonMake)
         layout.addLayout(buttonLayout)
         layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def copyFiles(self, _progress):
+        filters = parse_filters(self.inputFilters.getText())
+        src = self.inputFolder.getText()
+        read_pattern = self.inputPattern.getText()
+        dst = self.outputPattern.getText()
+        save_pattern = self.outputPattern.getText()
+        save_name = self.outputName.getText()
+
+        recursive = self.checkRecursive.isChecked()
+
+        return copy_pattern(src=src,
+                            dst=dst,
+                            filters=filters,
+                            read_pattern=read_pattern,
+                            save_pattern=save_pattern,
+                            save_name=save_name,
+                            recursive=recursive,
+                            verbose=True)
 
 
 if __name__ == '__main__':
