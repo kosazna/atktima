@@ -75,6 +75,8 @@ class KtimaUI(QWidget):
         self.filesTab.otas.clearContent()
         self.filesTab.otas.addItems(db.get_ota_per_meleti_company(
             state['meleti'], state['company']))
+        melType = state[state['meleti']]['type']
+        self.filesTab.localWidget.setCurrentText(melType)
         # self.filesTab.companyOtaCombo.clearItems()
         # self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
         self.countTab.meleti.setText(state['meleti'])
@@ -95,6 +97,8 @@ class KtimaUI(QWidget):
         self.paradosiTab.meleti.setText(state['meleti'])
         self.paradosiTab.fullname.setText(state['fullname'])
         self.paradosiTab.company.setText(state['company'])
+        self.paradosiTab.selectorMetadata.setCurrentText(melType)
+        self.paradosiTab.selectorSpatial.setCurrentText(melType)
 
         self.anartisiTab.meleti.setText(state['meleti'])
         self.anartisiTab.fullname.setText(state['fullname'])

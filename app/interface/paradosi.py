@@ -116,8 +116,9 @@ class ParadosiTab(QWidget):
 
         self.dateMetadata.setPlaceholder("dd/mm/yyyy")
         self.folderOutput.setCurrentText("ParadosiData")
-        self.selectorMetadata.setCurrentText('ktima16')
-        self.selectorSpatial.setCurrentText('ktima16')
+        selectorsKey = state[state['meleti']]['type']
+        self.selectorMetadata.setCurrentText(selectorsKey)
+        self.selectorSpatial.setCurrentText(selectorsKey)
         self.shape.addItems(db.get_shapes(state['meleti']))
         self.otas.addItems(db.get_ota_per_meleti_company(
             state['meleti'], state['company']))

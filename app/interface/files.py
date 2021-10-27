@@ -101,8 +101,10 @@ class FilesTab(QWidget):
                                 parent=self)
 
         self.progress = ProgressBar(parent=self)
-        self.serverWidget.setCurrentText('NAMA Server')
-        self.localWidget.setCurrentText(state['company'])
+        serverWidgetKey = f"{state['company']} Server"
+        self.serverWidget.setCurrentText(serverWidgetKey)
+        localWidgetKey = state[state['meleti']]['type']
+        self.localWidget.setCurrentText(localWidgetKey)
         self.localLoad.disable()
         self.checkServer()
         self.shape.addItems(db.get_shapes(state['meleti']))

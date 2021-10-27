@@ -22,7 +22,7 @@ class KtimaSQL(SQLiteEngine):
     def load_state(self):
         user_settings = self.get_user_settings()
         meletes = self.get_meleti_ota_info()
-        all_mel_codes = {'all_mel_codes': meletes.keys()}
+        all_mel_codes = {'all_mel_codes': tuple(meletes.keys())}
 
         initial_db_state = {**user_settings, **meletes, **all_mel_codes}
 
@@ -54,8 +54,10 @@ class KtimaSQL(SQLiteEngine):
         query = app_queries['select_all_companies'].attrs(fetch='col')
         companies = db.select(query)
 
-        for meleti_code, meleti_name in meleti_code_name:
-            meletes[meleti_code] = {'name': meleti_name, 'company': {}}
+        for meleti_code, meleti_name, mel_type in meleti_code_name:
+            meletes[meleti_code] = {'name': meleti_name,
+                                    'company': {},
+                                    'type': mel_type}
             for company in companies:
                 query = app_queries['select_ota_from_meleti_company'].attrs(
                     fetch='col').set(meleti=meleti_code, company=company)
@@ -66,11 +68,11 @@ class KtimaSQL(SQLiteEngine):
 
         return meletes
 
-    def get_meletes(self) -> dict:
-        query = app_queries['select_meletes'].attrs(fetch='rows')
-        meleti_code_name = db.select(query)
+    # def get_meletes(self) -> dict:
+    #     query = app_queries['select_meletes'].attrs(fetch='rows')
+    #     meleti_code_name = db.select(query)
 
-        return dict(meleti_code_name)
+    #     return dict(meleti_code_name)
 
     def get_companies_per_meleti(self, meleti: str) -> tuple:
         query = app_queries['select_companies_per_meleti'].attrs(
