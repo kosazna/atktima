@@ -55,5 +55,26 @@ class KtimaPaths(PathEngine):
             return _path
         return _path.as_posix()
 
+    def get_json_status(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("!InputData/Docs/KT_Status.json")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
+    def get_empty_shapes(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("!InputData/Shapefiles/Empty_Shapefiles")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
+    def get_metadata(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("!InputData/XML_Prototypes")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
 
 paths = KtimaPaths(appname=APPNAME)

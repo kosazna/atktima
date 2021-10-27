@@ -40,7 +40,7 @@ class OrganizeTab(QWidget):
         set_size(widget=self, size=size)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(2,4,2,0)
+        layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
@@ -54,6 +54,26 @@ class OrganizeTab(QWidget):
                              parent=self)
         self.meleti = Label(icon='layers-fill',
                             label=state['meleti'],
+                            parent=self)
+
+        self.inputFolder = FolderInput(label="Εύρεση σε",
+                                       parent=self)
+        self.inputPattern = StrSelector(label="Δομή",
+                                        combosize=(200, 24),
+                                        editsize=(300, 24),
+                                        parent=self)
+        self.inputFilters = StrInput("Φίλτρα")
+
+        self.ouputFolder = FolderInput(label="Απόθεση σε",
+                                       parent=self)
+        self.outputPattern = StrSelector(label="Δομή",
+                                         combosize=(200, 24),
+                                         editsize=(300, 24),
+                                         parent=self)
+
+        self.buttonCopy = Button(label='Αντιγραφή',
+                                 parent=self)
+        self.buttonMake = Button(label='Δημιουργία',
                             parent=self)
 
         labelLayout.addWidget(self.fullname)

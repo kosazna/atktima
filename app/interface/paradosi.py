@@ -15,9 +15,11 @@ from at.io.copyfuncs import batch_copy_file, copy_file
 from at.logger import log
 from at.path import PathEngine
 from at.result import Result
-from atktima.app.utils import db, paths, state
-from atktima.app.core import get_shapes
+from atktima.app.core import (create_empty_shapes, create_metadata,
+                              get_organized_server_files, get_shapes,
+                              get_unorganized_server_files)
 from atktima.app.settings import *
+from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
@@ -188,9 +190,89 @@ class ParadosiTab(QWidget):
 
     def updateFinish(self):
         pass
+    
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def loadAll(self, _progress):
+        actions = {'loadSpatial': None,
+                   'loadMdbs': None,
+                   'loadEmpty': None,
+                   'loadMetadata': None}
 
-    def loadSpatial(self):
-        pass
+        actions['loadSpatial'] = self.loadSpatial(_progress)
+        actions['loadMdbs'] = self.loadMdbs(_progress)
+        actions['loadEmpty'] = self.loadEmpty(_progress)
+        actions['loadMetadata'] = self.loadMetadata(_progress)
+        
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def loadSpatial(self, _progress):
+        local_folder = paths.get_localdata()
+        paradosi_folder = self.folderOutput.getText()
+
+        struct_key = state[state['meleti']]['type']
+        local_structure = local_mapping[struct_key]
+        paradosi_structure = self.selectorSpatial.getText()
+
+        user_shapes = self.shape.getCheckState()
+        user_otas = self.otas.getCheckState()
+
+        if user_otas and user_shapes:
+            return get_shapes(src=local_folder,
+                              dst=paradosi_folder,
+                              otas=user_otas,
+                              shapes=user_shapes,
+                              server_schema=local_structure,
+                              local_schema=paradosi_structure,
+                              _progress=_progress)
+        else:
+            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def loadMdbs(self, _progress):
+        mdb_folder = self.mdbFolder.getText()
+        paradosi_folder = self.folderOutput.getText()
+        are_organized = self.checkMdbOrganized.isChecked()
+        user_otas = self.otas.getCheckState()
+        paradosi_structure = self.selectorSpatial.getText()
+
+        if are_organized:
+            return get_organized_server_files(src=mdb_folder,
+                                              dst=paradosi_folder,
+                                              otas=user_otas,
+                                              _progress=_progress)
+        else:
+            return get_unorganized_server_files(src=mdb_folder,
+                                                dst=paradosi_folder,
+                                                otas=user_otas,
+                                                local_schema=paradosi_structure,
+                                                _progress=_progress)
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def loadEmpty(self, _progress):
+        empty_folder = paths.get_empty_shapes()
+        paradosi_folder = self.folderOutput.getText()
+        user_otas = self.otas.getCheckState()
+        shapes = db.get_shapes(state['meleti'])
+        paradosi_structure = self.selectorSpatial.getText()
+
+        return create_empty_shapes(src=empty_folder,
+                                   dst=paradosi_folder,
+                                   otas=user_otas,
+                                   meleti_shapes=shapes,
+                                   local_schema=paradosi_structure,
+                                   _progress=_progress)
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def loadMetadata(self, _progress):
+        metadata_folder = paths.get_metadata()
+        paradosi_folder = self.folderOutput.getText()
+        user_otas = self.otas.getCheckState()
+        paradosi_structure = self.selectorSpatial.getText()
+
+        return create_empty_shapes(src=metadata_folder,
+                                   dst=paradosi_folder,
+                                   otas=user_otas,
+                                   metadata_schema=paradosi_structure,
+                                   _progress=_progress)
 
 
 if __name__ == '__main__':

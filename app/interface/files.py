@@ -8,6 +8,7 @@ from at.gui.components import *
 from at.gui.utils import set_size
 from at.gui.worker import run_thread
 from at.io.copyfuncs import copy_file
+from at.io.utils import load_json, write_json
 from at.logger import log
 from at.result import Result
 from at.text import replace_all
@@ -36,6 +37,8 @@ class FilesTab(QWidget):
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
+
+        self.filesCopied = False
 
         self.serverLoad.clicked.connect(self.onGetFromServer)
         self.localLoad.clicked.connect(self.onGetFromLocal)
@@ -179,15 +182,20 @@ class FilesTab(QWidget):
                     self.popup.warning(status.msg, **status.details)
                 else:
                     self.popup.info(status.msg, **status.details)
+                    self.filesCopied = True
             else:
                 self.popup.info(status)
 
     def updateFinish(self):
-        pass
+        if self.filesCopied:
+            user_shapes = self.shape.getCheckState()
+            status = load_json(paths.get_json_status())
 
-    # def loadOtas(self):
-    #     company = [self.companyOtaCombo.getCurrentText()]
-    #     return state[state['meleti']]['company'][company]
+            for shape in user_shapes:
+                if shape in status['ktima']['SHAPE']:
+                    status['ktima']['SHAPE'][shape] = False
+
+            write_json(paths.get_json_status(), status)
 
     def onGetFromServer(self):
         run_thread(threadpool=self.threadpool,
