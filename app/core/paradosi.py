@@ -9,50 +9,6 @@ from at.result import Result
 from at.text import replace_all
 from atktima.app.settings import *
 
-ot = [
-    "22003",
-    "22006",
-    "22008",
-    "22011",
-    "22012",
-    "22019",
-    "22022",
-    "22033",
-    "22044",
-    "22049",
-    "22050",
-    "22055",
-    "22057",
-    "22058",
-    "22059",
-    "22062",
-    "22063",
-    "22066",
-    "22070",
-    "22071",
-    "22076",
-    "22085",
-    "22093",
-    "22095",
-    "22098",
-    "22100",
-    "22101",
-    "22103",
-    "22104",
-    "22105",
-    "22106",
-    "22107",
-    "22110",
-    "22116",
-    "22123",
-    "22125",
-    "22126",
-    "22129",
-    "22132",
-    "22134",
-    "22140",
-    "22141"]
-
 
 def get_organized_server_files(src: Union[str, Path],
                                dst: Union[str, Path],
@@ -63,17 +19,24 @@ def get_organized_server_files(src: Union[str, Path],
     dst_path = Path(dst)
 
     zip_dst = dst_path.joinpath(databases)
-    for p in src_path.glob('*.zip'):
+    zip_files = src_path.glob('*.zip')
+    _progress.emit({'pbar_max': len(zip_files),
+                    'pbar': 0,
+                    'status': 'Αντιγραφή αρχείων zip'})
+    for idx, p in enumerate(zip_files, 1):
         filename = p.stem
         if filename in otas:
             copy_file(p, zip_dst)
+            _progress.emit({'pbar': idx})
 
+    _progress.emit({'status': 'Αντιγραφή mdb: GEITONES'})
     geitones_src = src_path.joinpath('GEITONES')
     geitones_dst = dst_path.joinpath(f"{other}/GEITONES")
     copy_file(geitones_src, geitones_dst)
 
     forest_src = src_path.joinpath('FOREST')
     if forest_src.exists():
+        _progress.emit({'status': 'Αντιγραφή mdb: FOREST'})
         forest_dst = dst_path.joinpath(f"{other}/FOREST")
         copy_file(forest_src, forest_dst)
 
@@ -85,10 +48,15 @@ def get_organized_server_files(src: Union[str, Path],
 
     spatial_dst = dst_path.joinpath(spatial)
 
-    for p in _spatial.iterdir():
+    spatial_files = _spatial.iterdir()
+    _progress.emit({'pbar_max': len(spatial_files),
+                    'pbar': 0,
+                    'status': 'Αντιγραφή χωρικών αρχείων'})
+    for idx, p in enumerate(spatial_files, 1):
         filename = p.stem
         if filename in otas:
             copy_file(p, spatial_dst, save_name=filename)
+            _progress.emit({'pbar': idx})
 
 
 def get_unorganized_server_files(src: Union[str, Path],
@@ -105,7 +73,10 @@ def get_unorganized_server_files(src: Union[str, Path],
 
     zip_dst.mkdir(parents=True, exist_ok=True)
 
-    for ota in otas:
+    _progress.emit({'pbar_max': len(otas),
+                    'pbar': 0,
+                    'status': 'Γίνεται οργάνωση των βάσεων'})
+    for idx, ota in enumerate(otas):
         for p in src_path.glob(f"{ota}*.mdb"):
             filename = p.stem
 
@@ -122,6 +93,7 @@ def get_unorganized_server_files(src: Union[str, Path],
                 copy_file(p, _dst, save_name='VSTEAS_REL')
             else:
                 zip_file(p, zip_dst)
+        _progress.emit({'pbar': idx})
 
 
 def create_empty_shapes(src: Union[str, Path],
@@ -133,6 +105,10 @@ def create_empty_shapes(src: Union[str, Path],
     src_path = Path(src)
     dst_path = Path(dst)
 
+    _progress.emit({'pbar_max': 100,
+                    'pbar': 0,
+                    'status': 'Γίνεται δημιουργία των κενών αρχείων'})
+
     for p in src_path.glob('**/*.shp'):
         filename = p.stem
         if filename in meleti_shapes:
@@ -140,7 +116,7 @@ def create_empty_shapes(src: Union[str, Path],
                 sub_dst = replace_all(local_schema, {'shape': filename,
                                                      'ota': ota})
                 _dst = dst_path.joinpath(f"{sub_dst}/{filename}.shp")
-                
+
                 if not _dst.exists():
                     copy_file(p, _dst)
 
@@ -157,12 +133,16 @@ def create_metadata(src: Union[str, Path],
     ota_re = re.compile(r'(<CODE_OKXE>)(\d*)(</CODE_OKXE>)')
     date_re = re.compile(r'(<DeliveryDate>)(\d*/\d*/\d*)(</DeliveryDate>)')
 
+    _progress.emit({'pbar_max': len(otas),
+                    'pbar': 0,
+                    'status': 'Γίνεται δημιουργία των metadata'})
+
     metadatas = {}
     for p in src_path.glob('*.xml'):
         filename = p.stem
         metadatas[filename] = p.read_text(encoding='utf-8-sig')
 
-    for ota in otas:
+    for idx, ota in enumerate(otas, 1):
         sub_dst = replace_all(metadata_schema, {'ota': ota})
         _dst = dst_path.joinpath(sub_dst)
         _dst.mkdir(parents=True, exist_ok=True)
@@ -174,6 +154,7 @@ def create_metadata(src: Union[str, Path],
 
             _dst.joinpath(f"{metadata}.xml").write_text(_meta,
                                                         encoding='utf-8-sig')
+        _progress.emit({'pbar': idx})
 
 
 # create_empty_shapes(src="C:\KT2-11\!InputData\Shapefiles\Empty_Shapefiles",

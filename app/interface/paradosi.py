@@ -40,6 +40,12 @@ class ParadosiTab(QWidget):
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
 
+        self.makeAll.subscribe(self.onMakeAll)
+        self.makeSpatial.subscribe(self.onMakeSpatial)
+        self.makeMdbs.subscribe(self.onMakeMdbs)
+        self.makeEmpty.subscribe(self.onMakeEmpty)
+        self.makeMetadata.subscribe(self.onMakeMetadata)
+
     def setupUi(self, size):
         set_size(widget=self, size=size)
         path_mapping = {'ParadosiData': paths.get_paradosidata()}
@@ -190,7 +196,88 @@ class ParadosiTab(QWidget):
 
     def updateFinish(self):
         pass
+
+    def validate(self, funcname: str):
+        paradosi_folder = self.folderOutput.getText()
+        paradosi_structure = self.selectorSpatial.getText()
+
+        user_shapes = self.shape.getCheckState()
+        user_otas = self.otas.getCheckState()
+        mdb_folder = self.mdbFolder.getText()
+
+        probs = []
+
+        if funcname == 'loadSpatial':
+            if not paradosi_folder or Path(paradosi_folder).exists():
+                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not paradosi_structure:
+                probs.append("Δεν βρέθηκε δομή παράδοσης")
+            if not user_shapes:
+                probs.append("Δεν βρέθηκε επιλογή χωρικών")
+            if not user_otas:
+                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+        elif funcname == 'loadMdbs-organized':
+            if not paradosi_folder or Path(paradosi_folder).exists():
+                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not mdb_folder or Path(mdb_folder).exists():
+                probs.append("Δεν βρέθηκε φάκελος βάσεων")
+            if not user_otas:
+                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+        elif funcname == 'loadMdbs-unorganized':
+            if not paradosi_folder or Path(paradosi_folder).exists():
+                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not mdb_folder or Path(mdb_folder).exists():
+                probs.append("Δεν βρέθηκε φάκελος βάσεων")
+            if not paradosi_structure:
+                probs.append("Δεν βρέθηκε δομή παράδοσης")
+            if not user_otas:
+                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+        elif funcname in ['loadEmpty', 'loadMetadata']:
+            if not paradosi_folder or Path(paradosi_folder).exists():
+                probs.append("Δεν βρέθηκε φάκελος παράδοσης")
+            if not paradosi_structure:
+                probs.append("Δεν βρέθηκε δομή παράδοσης")
+            if not user_otas:
+                probs.append("Δεν βρέθηκε επιλογή ΟΤΑ")
+
+        if probs:
+            return '\n'.join(probs)
+        return None
+
+    def onMakeAll(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.loadAll,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
     
+    def onMakeSpatial(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.loadSpatial,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
+    def onMakeMdbs(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.loadMdbs,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+    def onMakeEmpty(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.loadEmpty,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
+    def onMakeMetadata(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.loadMetadata,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
     @licensed(appname=state['appname'], category=state['meleti'])
     def loadAll(self, _progress):
         actions = {'loadSpatial': None,
@@ -202,7 +289,7 @@ class ParadosiTab(QWidget):
         actions['loadMdbs'] = self.loadMdbs(_progress)
         actions['loadEmpty'] = self.loadEmpty(_progress)
         actions['loadMetadata'] = self.loadMetadata(_progress)
-        
+
     @licensed(appname=state['appname'], category=state['meleti'])
     def loadSpatial(self, _progress):
         local_folder = paths.get_localdata()
@@ -215,16 +302,18 @@ class ParadosiTab(QWidget):
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
 
-        if user_otas and user_shapes:
-            return get_shapes(src=local_folder,
-                              dst=paradosi_folder,
-                              otas=user_otas,
-                              shapes=user_shapes,
-                              server_schema=local_structure,
-                              local_schema=paradosi_structure,
-                              _progress=_progress)
-        else:
-            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία')
+        validation = self.validate('loadSpatial')
+        if validation is not None:
+            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία',
+                                  details={'secondary': validation})
+
+        return get_shapes(src=local_folder,
+                          dst=paradosi_folder,
+                          otas=user_otas,
+                          shapes=user_shapes,
+                          server_schema=local_structure,
+                          local_schema=paradosi_structure,
+                          _progress=_progress)
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def loadMdbs(self, _progress):

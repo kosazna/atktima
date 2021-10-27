@@ -79,7 +79,7 @@ class FilesTab(QWidget):
         self.otas = ListWidget(label="Επιλογή ΟΤΑ",
                                parent=self)
         self.serverLoad = Button("Φόρτωση από Server",
-                                 color='green',
+                                 color='blue',
                                  size=(180, 30),
                                  parent=self)
         # self.serverCombo = ComboInput(label="Δομή Server",
@@ -231,7 +231,7 @@ class FilesTab(QWidget):
         else:
             _folder = paths.get_localdata()
 
-        result = self.popup.warning("Διαγραφή επιλεγμένων αρχείων απο φάκελο:",
+        result = self.popup.warning("Διαγραφή επιλεγμένων αρχείων απο φάκελο",
                                     secondary=_folder,
                                     buttons=['yes', 'no'])
 
@@ -298,15 +298,23 @@ class FilesTab(QWidget):
         user_shapes = self.shape.getCheckState()
 
         folder = self.localFolder.getText()
+        _progress.emit({'pbar_max': len(user_shapes)})
 
         if folder:
             _folder = Path(folder)
         else:
             _folder = paths.get_localdata(True)
 
-        for shape in user_shapes:
+        del_count = 0
+        for idx, shape in enumerate(user_shapes, 1):
             for p in _folder.glob(shape):
                 p.unlink(missing_ok=True)
+                del_count += 1
+            _progress.emit({'pbar': idx})
+
+        if del_count:
+            return Result.success(f"Έγινε διαγραφή {del_count} αρχείων")
+        return Result.warning("Δεν διαγράφτηκε κανένα αρχείο")
 
 
 if __name__ == '__main__':

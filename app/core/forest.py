@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from pathlib import Path
-from typing import Union
+from typing import Callable, Optional, Union
 
 import pandas as pd
 
 
 def forest(claims: Union[str, Path],
            active_forest: Union[str, Path],
-           output: Union[str, Path]):
+           output: Union[str, Path],
+           _progress: Optional[Callable] = None):
     def make_owner(df):
         if df['TYPE'] == 0 and df['DASIKO'] == 0:
             return 0
@@ -26,6 +27,8 @@ def forest(claims: Union[str, Path],
                                     'AREAFOREST': 'float64',
                                     'AREA_REST': 'float64',
                                     'TYPE': 'int64'})
+
+    _progress.emit({'status': f"Διεκδίκηση σε: {diekdikisi.shape[0]} | ΚΑΕΚ με δασικό: {dasika_energa.shape[0]}"})
 
     dasika_energa['KAEK'] = dasika_energa['KAEK'].str.replace('¿¿', 'ΕΚ')
     dasika_energa['DASIKO'] = 1
