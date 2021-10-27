@@ -42,6 +42,10 @@ class OrganizeTab(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
+        inputLayout = QVBoxLayout()
+        inputFilterLayout = QHBoxLayout()
+        outputLayout = QVBoxLayout()
+        buttonLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
                               label=state['fullname'],
@@ -63,6 +67,7 @@ class OrganizeTab(QWidget):
                                         editsize=(300, 24),
                                         parent=self)
         self.inputFilters = StrInput("Φίλτρα")
+        self.checkRecursive = CheckInput("Εύρεση σε υποφακέλους")
 
         self.ouputFolder = FolderInput(label="Απόθεση σε",
                                        parent=self)
@@ -72,9 +77,12 @@ class OrganizeTab(QWidget):
                                          parent=self)
 
         self.buttonCopy = Button(label='Αντιγραφή',
+                                 size=(180, 30),
                                  parent=self)
         self.buttonMake = Button(label='Δημιουργία',
-                            parent=self)
+                                 size=(180, 30),
+                                 parent=self)
+        self.status = StatusButton(parent=self)
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -82,6 +90,21 @@ class OrganizeTab(QWidget):
         labelLayout.addWidget(self.meleti)
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
+        inputLayout.addWidget(self.inputFolder)
+        inputLayout.addWidget(self.inputPattern)
+        inputFilterLayout.addWidget(self.inputFilters)
+        inputFilterLayout.addWidget(self.checkRecursive)
+        inputLayout.addLayout(inputFilterLayout)
+        layout.addLayout(inputLayout)
+        layout.addWidget(HLine())
+        outputLayout.addWidget(self.ouputFolder)
+        outputLayout.addWidget(self.outputPattern)
+        layout.addLayout(outputLayout)
+        layout.addWidget(HLine())
+        buttonLayout.addWidget(self.buttonCopy)
+        buttonLayout.addWidget(self.buttonMake)
+        layout.addLayout(buttonLayout)
+        layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
 
