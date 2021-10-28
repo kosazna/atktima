@@ -120,8 +120,10 @@ class CountTab(QWidget):
         layout.addLayout(countLayout)
         buttonLayout.addWidget(self.buttonCount)
         buttonLayout.addWidget(self.buttonMissing)
-        layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
+        layout.addWidget(HLine(), alignment=Qt.AlignTop)
+        layout.addStretch(1)
         layout.addLayout(buttonLayout)
+        layout.addStretch(1)
 
         self.setLayout(layout)
 

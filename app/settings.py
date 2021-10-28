@@ -7,17 +7,17 @@ APPICON = "atktima.ico"
 FONT = "Segoe UI"
 FONTSIZE = 9
 
-databases = "ΕΝΔΙΑΜΕΣΗ ΥΠΟΒΟΛΗ ΚΤΗΜΑΤΟΛΟΓΙΚΗΣ ΒΑΣΗΣ ΠΕΡΙΓΡΑΦΙΚΩΝ ΣΤΟΙΧΕΙΩΝ"
-spatial = "ΕΝΔΙΑΜΕΣΗ ΥΠΟΒΟΛΗ ΚΤΗΜΑΤΟΛΟΓΙΚΗΣ ΒΑΣΗΣ ΧΩΡΙΚΩΝ ΣΤΟΙΧΕΙΩΝ"
-other = "ΣΥΝΗΜΜΕΝΑ ΑΡΧΕΙΑ"
+DATABASES = "ΕΝΔΙΑΜΕΣΗ ΥΠΟΒΟΛΗ ΚΤΗΜΑΤΟΛΟΓΙΚΗΣ ΒΑΣΗΣ ΠΕΡΙΓΡΑΦΙΚΩΝ ΣΤΟΙΧΕΙΩΝ"
+SPATIAL = "ΕΝΔΙΑΜΕΣΗ ΥΠΟΒΟΛΗ ΚΤΗΜΑΤΟΛΟΓΙΚΗΣ ΒΑΣΗΣ ΧΩΡΙΚΩΝ ΣΤΟΙΧΕΙΩΝ"
+OTHER = "ΣΥΝΗΜΜΕΝΑ ΑΡΧΕΙΑ"
 
-server_mapping = {"NAMA Server": '<ota>/SHP',
+SERVER_MAPPING = {"NAMA Server": '<ota>/SHP',
                   "2KP Server": '<ota>/SHP/<shape>',
                   "Άλλη παράδοση (ktima11)": '<ota>/SHAPE/<shape>',
                   "Άλλη παράδοση (ktima16)": '<ota>/<shape>'}
 
-local_mapping = {"ktima16": '<ota>/<shape>',
+LOCAL_MAPPING = {"ktima16": '<ota>/<shape>',
                  "ktima11": '<ota>/SHAPE/<shape>'}
 
-metadata_mapping = {"ktima16": '<ota>',
+METADATA_MAPPING = {"ktima16": '<ota>',
                     "ktima11": '<ota>/METADATA'}

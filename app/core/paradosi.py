@@ -18,8 +18,8 @@ def get_organized_server_files(src: Union[str, Path],
     src_path = Path(src)
     dst_path = Path(dst)
 
-    zip_dst = dst_path.joinpath(databases)
-    zip_files = src_path.glob('*.zip')
+    zip_dst = dst_path.joinpath(DATABASES)
+    zip_files = list(src_path.glob('*.zip'))
     _progress.emit({'pbar_max': len(zip_files),
                     'pbar': 0,
                     'status': 'Αντιγραφή αρχείων zip'})
@@ -31,13 +31,13 @@ def get_organized_server_files(src: Union[str, Path],
 
     _progress.emit({'status': 'Αντιγραφή mdb: GEITONES'})
     geitones_src = src_path.joinpath('GEITONES')
-    geitones_dst = dst_path.joinpath(f"{other}/GEITONES")
+    geitones_dst = dst_path.joinpath(f"{OTHER}")
     copy_file(geitones_src, geitones_dst)
 
     forest_src = src_path.joinpath('FOREST')
     if forest_src.exists():
         _progress.emit({'status': 'Αντιγραφή mdb: FOREST'})
-        forest_dst = dst_path.joinpath(f"{other}/FOREST")
+        forest_dst = dst_path.joinpath(f"{OTHER}")
         copy_file(forest_src, forest_dst)
 
     spatial_src = src_path.joinpath('SHAPE')
@@ -46,9 +46,9 @@ def get_organized_server_files(src: Union[str, Path],
     else:
         _spatial = src_path.joinpath('ΧΩΡΙΚΑ')
 
-    spatial_dst = dst_path.joinpath(spatial)
+    spatial_dst = dst_path.joinpath(SPATIAL)
 
-    spatial_files = _spatial.iterdir()
+    spatial_files = list(_spatial.iterdir())
     _progress.emit({'pbar_max': len(spatial_files),
                     'pbar': 0,
                     'status': 'Αντιγραφή χωρικών αρχείων'})
@@ -57,6 +57,8 @@ def get_organized_server_files(src: Union[str, Path],
         if filename in otas:
             copy_file(p, spatial_dst, save_name=filename)
             _progress.emit({'pbar': idx})
+
+    _progress.emit({'status': 'Οι βάσεις οργανώθηκαν'})
 
 
 def get_unorganized_server_files(src: Union[str, Path],
@@ -67,16 +69,16 @@ def get_unorganized_server_files(src: Union[str, Path],
     src_path = Path(src)
     dst_path = Path(dst)
 
-    zip_dst = dst_path.joinpath(databases)
-    other_dst = dst_path.joinpath(other)
-    spatial_dst = dst_path.joinpath(spatial)
+    zip_dst = dst_path.joinpath(DATABASES)
+    other_dst = dst_path.joinpath(OTHER)
+    spatial_dst = dst_path.joinpath(SPATIAL)
 
     zip_dst.mkdir(parents=True, exist_ok=True)
 
     _progress.emit({'pbar_max': len(otas),
                     'pbar': 0,
                     'status': 'Γίνεται οργάνωση των βάσεων'})
-    for idx, ota in enumerate(otas):
+    for idx, ota in enumerate(otas, 1):
         for p in src_path.glob(f"{ota}*.mdb"):
             filename = p.stem
 
@@ -93,7 +95,10 @@ def get_unorganized_server_files(src: Union[str, Path],
                 copy_file(p, _dst, save_name='VSTEAS_REL')
             else:
                 zip_file(p, zip_dst)
+                copy_file(p, spatial_dst)
         _progress.emit({'pbar': idx})
+
+    _progress.emit({'status': 'Οι βάσεις οργανώθηκαν'})
 
 
 def create_empty_shapes(src: Union[str, Path],
@@ -115,10 +120,12 @@ def create_empty_shapes(src: Union[str, Path],
             for ota in otas:
                 sub_dst = replace_all(local_schema, {'shape': filename,
                                                      'ota': ota})
-                _dst = dst_path.joinpath(f"{sub_dst}/{filename}.shp")
+                _dst = dst_path.joinpath(f"{sub_dst}")
 
                 if not _dst.exists():
-                    copy_file(p, _dst)
+                    copy_file(p, _dst, copymode='fast')
+
+    _progress.emit({'status': 'Τα κενά αρχεία δημιουργήθηκαν'})
 
 
 def create_metadata(src: Union[str, Path],
@@ -155,6 +162,8 @@ def create_metadata(src: Union[str, Path],
             _dst.joinpath(f"{metadata}.xml").write_text(_meta,
                                                         encoding='utf-8-sig')
         _progress.emit({'pbar': idx})
+
+    _progress.emit({'status': 'Τα metadata δημιουργήθηκαν'})
 
 
 # create_empty_shapes(src="C:\KT2-11\!InputData\Shapefiles\Empty_Shapefiles",

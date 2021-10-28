@@ -83,12 +83,12 @@ class ParadosiTab(QWidget):
         self.selectorMetadata = StrSelector(label="Δομή Metadata",
                                             labelsize=(90, 24),
                                             editsize=(200, 24),
-                                            mapping=metadata_mapping,
+                                            mapping=METADATA_MAPPING,
                                             parent=self)
         self.selectorSpatial = StrSelector(label="Δομή Χωρικών",
                                            labelsize=(90, 24),
                                            editsize=(200, 24),
-                                           mapping=local_mapping,
+                                           mapping=LOCAL_MAPPING,
                                            parent=self)
         self.folderOutput = PathSelector(label="Φάκελος που θα δημιουργηθεί η παράδοση",
                                          selectortype='folder_in',
@@ -98,10 +98,10 @@ class ParadosiTab(QWidget):
                                          labelsize=(None, 24),
                                          parent=self)
         self.shape = ListWidget(label="Επιλογή Χωρικών",
-                                widgetsize=(None, 200),
+                                widgetsize=(None, 220),
                                 parent=self)
         self.otas = ListWidget(label="Επιλογή ΟΤΑ",
-                               widgetsize=(None, 200),
+                               widgetsize=(None, 220),
                                parent=self)
         self.makeAll = Button("Φόρτωση Όλων",
                               color='blue',
@@ -159,9 +159,9 @@ class ParadosiTab(QWidget):
         buttonLayout.addWidget(self.makeMdbs)
         buttonLayout.addWidget(self.makeEmpty)
         buttonLayout.addWidget(self.makeMetadata)
+        layout.addStretch(1)
         layout.addLayout(buttonLayout)
-        layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
-        layout.addWidget(self.progress)
+        layout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
         layout.addWidget(self.status)
 
         self.setLayout(layout)
@@ -219,14 +219,14 @@ class ParadosiTab(QWidget):
         elif funcname == 'loadMdbs-organized':
             if not paradosi_folder or not Path(paradosi_folder).exists():
                 probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
-            if not mdb_folder or Path(mdb_folder).exists():
+            if not mdb_folder or not Path(mdb_folder).exists():
                 probs.append("-Δεν βρέθηκε φάκελος βάσεων")
             if not user_otas:
                 probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
         elif funcname == 'loadMdbs-unorganized':
             if not paradosi_folder or not Path(paradosi_folder).exists():
                 probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
-            if not mdb_folder or Path(mdb_folder).exists():
+            if not mdb_folder or not Path(mdb_folder).exists():
                 probs.append("-Δεν βρέθηκε φάκελος βάσεων")
             if not paradosi_structure:
                 probs.append("-Δεν βρέθηκε δομή παράδοσης")
@@ -244,7 +244,7 @@ class ParadosiTab(QWidget):
                 probs.append("-Δεν βρέθηκε φάκελος παράδοσης")
             if not paradosi_structure:
                 probs.append("-Δεν βρέθηκε δομή παράδοσης")
-            if not mdb_folder or Path(mdb_folder).exists():
+            if not mdb_folder or not Path(mdb_folder).exists():
                 probs.append("-Δεν βρέθηκε φάκελος βάσεων")
             if not user_shapes:
                 probs.append("-Δεν βρέθηκε επιλογή χωρικών")
@@ -299,7 +299,7 @@ class ParadosiTab(QWidget):
                    'loadEmpty': None,
                    'loadMetadata': None}
 
-        validation = self.validate('loadSpatial')
+        validation = self.validate('loadAll')
         if validation is not None:
             return validation
 
@@ -307,6 +307,8 @@ class ParadosiTab(QWidget):
         actions['loadMdbs'] = self.loadMdbs(_progress)
         actions['loadEmpty'] = self.loadEmpty(_progress)
         actions['loadMetadata'] = self.loadMetadata(_progress)
+
+        _progress.emit({'status': 'Η διαδικασία ολοκληρώθηκε'})
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def loadSpatial(self, _progress):
@@ -317,13 +319,15 @@ class ParadosiTab(QWidget):
         local_folder = paths.get_localdata()
         paradosi_folder = self.folderOutput.getText()
         struct_key = state[state['meleti']]['type']
-        local_structure = local_mapping[struct_key]
+        local_structure = LOCAL_MAPPING[struct_key]
         paradosi_structure = self.selectorSpatial.getText()
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
 
+        _output = Path(paradosi_folder).joinpath(SPATIAL)
+
         return get_shapes(src=local_folder,
-                          dst=paradosi_folder,
+                          dst=_output,
                           otas=user_otas,
                           shapes=user_shapes,
                           src_schema=local_structure,
@@ -368,8 +372,10 @@ class ParadosiTab(QWidget):
         shapes = db.get_shapes(state['meleti'])
         paradosi_structure = self.selectorSpatial.getText()
 
+        _output = Path(paradosi_folder).joinpath(SPATIAL)
+
         return create_empty_shapes(src=empty_folder,
-                                   dst=paradosi_folder,
+                                   dst=_output,
                                    otas=user_otas,
                                    meleti_shapes=shapes,
                                    local_schema=paradosi_structure,
@@ -384,13 +390,17 @@ class ParadosiTab(QWidget):
         metadata_folder = paths.get_metadata()
         paradosi_folder = self.folderOutput.getText()
         user_otas = self.otas.getCheckState()
-        paradosi_structure = self.selectorSpatial.getText()
+        metadata_structure = self.selectorMetadata.getText()
+        date = self.dateMetadata.getText()
 
-        return create_empty_shapes(src=metadata_folder,
-                                   dst=paradosi_folder,
-                                   otas=user_otas,
-                                   metadata_schema=paradosi_structure,
-                                   _progress=_progress)
+        _output = Path(paradosi_folder).joinpath(SPATIAL)
+
+        return create_metadata(src=metadata_folder,
+                               dst=_output,
+                               date=date,
+                               otas=user_otas,
+                               metadata_schema=metadata_structure,
+                               _progress=_progress)
 
 
 if __name__ == '__main__':

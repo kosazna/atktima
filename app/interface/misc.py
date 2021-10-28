@@ -77,12 +77,12 @@ class MiscTab(QWidget):
         self.selectorMetadata = StrSelector(label="Δομή Metadata",
                                             labelsize=(90, 24),
                                             editsize=(200, 24),
-                                            mapping=metadata_mapping,
+                                            mapping=METADATA_MAPPING,
                                             parent=self)
         self.selectorSpatial = StrSelector(label="Δομή Χωρικών",
                                            labelsize=(90, 24),
                                            editsize=(200, 24),
-                                           mapping=local_mapping,
+                                           mapping=LOCAL_MAPPING,
                                            parent=self)
         self.folderOutput = PathSelector(label="Φάκελος που θα δημιουργηθεί η παράδοση",
                                          selectortype='folder_in',

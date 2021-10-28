@@ -87,15 +87,17 @@ class FilesTab(QWidget):
         #                                      'Άλλο...'],
         #                               combosize=(200, 24),
         #                               parent=self)
-        self.serverWidget = StrSelector(label="Δομή Εισαγωγής",
-                                        mapping=server_mapping,
-                                        labelsize=(100, 24),
+        self.serverWidget = StrSelector(label="Δομή Προέλευσης",
+                                        mapping=SERVER_MAPPING,
+                                        labelsize=(120, 24),
                                         combosize=(180, 24),
+                                        editsize=(300, 24),
                                         parent=self)
-        self.localWidget = StrSelector(label="Δομή Τοπικά",
-                                       mapping=local_mapping,
-                                       labelsize=(100, 24),
+        self.localWidget = StrSelector(label="Δομή Προορισμού",
+                                       mapping=LOCAL_MAPPING,
+                                       labelsize=(120, 24),
                                        combosize=(180, 24),
+                                       editsize=(300, 24),
                                        parent=self)
         self.localFolder = FolderInput(label="Φάκελος", parent=self)
         self.localLoad = Button("Φόρτωση από Φάκελο",
@@ -139,6 +141,7 @@ class FilesTab(QWidget):
         layout.addWidget(self.localFolder)
         buttonLayout.addWidget(self.serverLoad)
         buttonLayout.addWidget(self.localLoad)
+        layout.addStretch(1)
         layout.addLayout(buttonLayout)
         layout.addWidget(self.deleteButton, alignment=Qt.AlignCenter)
         layout.addWidget(self.progress, stretch=2, alignment=Qt.AlignBottom)
@@ -250,7 +253,7 @@ class FilesTab(QWidget):
                    on_finish=self.updateFinish)
 
     def onGetFromLocal(self):
-        result = self.popup.info("Η δομή server είναι σωστή?",
+        result = self.popup.info("Η δομή προέλευσης είναι σωστή?",
                                  buttons=['yes', 'no'])
         if result == 'yes':
             return run_thread(threadpool=self.threadpool,
@@ -275,7 +278,7 @@ class FilesTab(QWidget):
 
         if result == 'yes':
             return run_thread(threadpool=self.threadpool,
-                              function=self.getFilesFromLocal,
+                              function=self.deleteFiles,
                               on_update=self.updateProgress,
                               on_result=self.updateResult,
                               on_finish=self.updateFinish)

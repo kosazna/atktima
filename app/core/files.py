@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
+from shutil import rmtree
 from typing import Callable, Iterable, Optional, Union
 
 from at.io.copyfuncs import copy_file
@@ -58,8 +59,8 @@ def delete_files(src: Union[str, Path],
 
     del_count = 0
     for idx, shape in enumerate(shapes, 1):
-        for p in src_path.glob(shape):
-            p.unlink(missing_ok=True)
+        for p in src_path.glob(f"**/{shape}"):
+            rmtree(p)
             del_count += 1
         _progress.emit({'pbar': idx})
 
