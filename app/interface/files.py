@@ -7,12 +7,10 @@ from at.auth.client import AuthStatus, licensed
 from at.gui.components import *
 from at.gui.utils import set_size
 from at.gui.worker import run_thread
-from at.io.copyfuncs import copy_file
 from at.io.utils import load_json, write_json
 from at.logger import log
 from at.result import Result
-from at.text import replace_all
-from atktima.app.core import get_shapes
+from atktima.app.core import delete_files, get_shapes
 from atktima.app.settings import *
 from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool
@@ -204,6 +202,46 @@ class FilesTab(QWidget):
 
             write_json(paths.get_json_status(), status)
 
+    def validate(self, funcname: str):
+        server_structure = self.serverWidget.getText()
+        local_structure = self.localWidget.getText()
+        local_folder = self.localFolder.getText()
+
+        user_shapes = self.shape.getCheckState()
+        user_otas = self.otas.getCheckState()
+
+        probs = []
+
+        if funcname == 'getFilesFromLocal':
+            if not local_folder or not Path(local_folder).exists():
+                probs.append("-Δεν βρέθηκε ο φάκελος")
+            if not server_structure:
+                probs.append("-Δεν βρέθηκε δομή προέλευσης χωρικών")
+            if not local_structure:
+                probs.append("-Δεν βρέθηκε δομή προορισμού χωρικών")
+            if not user_shapes:
+                probs.append("-Δεν βρέθηκε επιλογή χωρικών")
+            if not user_otas:
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
+        elif funcname == 'getFilesFromServer':
+            if not server_structure:
+                probs.append("-Δεν βρέθηκε δομή προέλευσης χωρικών")
+            if not local_structure:
+                probs.append("-Δεν βρέθηκε δομή προορισμού χωρικών")
+            if not user_shapes:
+                probs.append("-Δεν βρέθηκε επιλογή χωρικών")
+            if not user_otas:
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
+        elif funcname == 'deleteFiles':
+            if not user_shapes:
+                probs.append("-Δεν βρέθηκε επιλογή χωρικών")
+
+        if probs:
+            details = '\n'.join(probs)
+            return Result.warning('Προσδιόρισε όλες τις απαραίτητες παραμέτρους',
+                                  details={'secondary': details})
+        return None
+
     def onGetFromServer(self):
         run_thread(threadpool=self.threadpool,
                    function=self.getFilesFromServer,
@@ -246,75 +284,63 @@ class FilesTab(QWidget):
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def getFilesFromServer(self, _progress):
+        validation = self.validate('getFilesFromServer')
+        if validation is not None:
+            return validation
+
         server = paths.get_kthmadata(True)
         local = paths.get_localdata(True)
-
         server_structure = self.serverWidget.getText()
         local_structure = self.localWidget.getText()
-
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
 
-        if user_otas and user_shapes:
-            return get_shapes(src=server,
-                              dst=local,
-                              otas=user_otas,
-                              shapes=user_shapes,
-                              server_schema=server_structure,
-                              local_schema=local_structure,
-                              _progress=_progress)
-        else:
-            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία',
-                                  details={'secondary': 'Επέλεξε χωρικά και ΟΤΑ'})
+        return get_shapes(src=server,
+                          dst=local,
+                          otas=user_otas,
+                          shapes=user_shapes,
+                          src_schema=server_structure,
+                          dst_schema=local_structure,
+                          _progress=_progress)
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def getFilesFromLocal(self, _progress):
-        server = Path(self.localFolder.getText())
+        validation = self.validate('getFilesFromLocal')
+        if validation is not None:
+            return validation
+
+        server = self.localFolder.getText()
         local = paths.get_localdata(True)
-
-        if not server.exists():
-            return Result.error("Ο φάκελος δεν υπάρχει")
-
         server_structure = self.serverWidget.getText()
         local_structure = self.localWidget.getText()
-
         user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
 
-        if user_otas and user_shapes:
-            return get_shapes(src=server,
-                              dst=local,
-                              otas=user_otas,
-                              shapes=user_shapes,
-                              server_schema=server_structure,
-                              local_schema=local_structure,
-                              _progress=_progress)
-        else:
-            return Result.warning('Δεν βρέθηκε επιλογή για κάποια κατηγορία:',
-                                  details={'secondary': 'Επέλεξε χωρικά και ΟΤΑ'})
+        return get_shapes(src=server,
+                          dst=local,
+                          otas=user_otas,
+                          shapes=user_shapes,
+                          src_schema=server_structure,
+                          dst_schema=local_structure,
+                          _progress=_progress)
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def deleteFiles(self, _progress):
-        user_shapes = self.shape.getCheckState()
+        validation = self.validate('deleteFiles')
+        if validation is not None:
+            return validation
 
+        user_shapes = self.shape.getCheckState()
         folder = self.localFolder.getText()
-        _progress.emit({'pbar_max': len(user_shapes)})
 
         if folder:
             _folder = Path(folder)
         else:
             _folder = paths.get_localdata(True)
 
-        del_count = 0
-        for idx, shape in enumerate(user_shapes, 1):
-            for p in _folder.glob(shape):
-                p.unlink(missing_ok=True)
-                del_count += 1
-            _progress.emit({'pbar': idx})
-
-        if del_count:
-            return Result.success(f"Έγινε διαγραφή {del_count} αρχείων")
-        return Result.warning("Δεν διαγράφτηκε κανένα αρχείο")
+        return delete_files(src=_folder,
+                            shapes=user_shapes,
+                            _progress=_progress)
 
 
 if __name__ == '__main__':

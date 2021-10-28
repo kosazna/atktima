@@ -310,26 +310,24 @@ class ParadosiTab(QWidget):
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def loadSpatial(self, _progress):
-        local_folder = paths.get_localdata()
-        paradosi_folder = self.folderOutput.getText()
-
-        struct_key = state[state['meleti']]['type']
-        local_structure = local_mapping[struct_key]
-        paradosi_structure = self.selectorSpatial.getText()
-
-        user_shapes = self.shape.getCheckState()
-        user_otas = self.otas.getCheckState()
-
         validation = self.validate('loadSpatial')
         if validation is not None:
             return validation
+
+        local_folder = paths.get_localdata()
+        paradosi_folder = self.folderOutput.getText()
+        struct_key = state[state['meleti']]['type']
+        local_structure = local_mapping[struct_key]
+        paradosi_structure = self.selectorSpatial.getText()
+        user_shapes = self.shape.getCheckState()
+        user_otas = self.otas.getCheckState()
 
         return get_shapes(src=local_folder,
                           dst=paradosi_folder,
                           otas=user_otas,
                           shapes=user_shapes,
-                          server_schema=local_structure,
-                          local_schema=paradosi_structure,
+                          src_schema=local_structure,
+                          dst_schema=paradosi_structure,
                           _progress=_progress)
 
     @licensed(appname=state['appname'], category=state['meleti'])
@@ -360,15 +358,15 @@ class ParadosiTab(QWidget):
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def loadEmpty(self, _progress):
+        validation = self.validate('loadEmpty')
+        if validation is not None:
+            return validation
+
         empty_folder = paths.get_empty_shapes()
         paradosi_folder = self.folderOutput.getText()
         user_otas = self.otas.getCheckState()
         shapes = db.get_shapes(state['meleti'])
         paradosi_structure = self.selectorSpatial.getText()
-
-        validation = self.validate('loadEmpty')
-        if validation is not None:
-            return validation
 
         return create_empty_shapes(src=empty_folder,
                                    dst=paradosi_folder,
@@ -379,14 +377,14 @@ class ParadosiTab(QWidget):
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def loadMetadata(self, _progress):
+        validation = self.validate('loadMetadata')
+        if validation is not None:
+            return validation
+
         metadata_folder = paths.get_metadata()
         paradosi_folder = self.folderOutput.getText()
         user_otas = self.otas.getCheckState()
         paradosi_structure = self.selectorSpatial.getText()
-
-        validation = self.validate('loadMetadata')
-        if validation is not None:
-            return validation
 
         return create_empty_shapes(src=metadata_folder,
                                    dst=paradosi_folder,

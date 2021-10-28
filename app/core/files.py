@@ -11,8 +11,8 @@ def get_shapes(src: Union[str, Path],
                dst: Union[str, Path],
                otas: Iterable[str],
                shapes: Iterable[str],
-               server_schema: str,
-               local_schema: str,
+               src_schema: str,
+               dst_schema: str,
                _progress: Optional[Callable] = None) -> Result:
     src_path = Path(src)
     dst_path = Path(dst)
@@ -26,8 +26,8 @@ def get_shapes(src: Union[str, Path],
     for ota in otas:
         ota_counter += 1
         for shape in shapes:
-            sub_src = replace_all(server_schema, {'shape': shape, 'ota': ota})
-            sub_dst = replace_all(local_schema,  {'shape': shape, 'ota': ota})
+            sub_src = replace_all(src_schema, {'shape': shape, 'ota': ota})
+            sub_dst = replace_all(dst_schema,  {'shape': shape, 'ota': ota})
 
             if shape == 'VSTEAS_REL':
                 _src = src_path.joinpath(f"{sub_src}/{shape}.mdb")
@@ -48,3 +48,21 @@ def get_shapes(src: Union[str, Path],
         return Result.success("Η αντιγραφή αρχείων ολοκληρώθηκε",
                               details={'secondary': f"Σύνολο αρχείων: {file_counter}"})
     return Result.warning("Δεν έγινε αντιγραφή για κανένα αρχείο")
+
+
+def delete_files(src: Union[str, Path],
+                 shapes: Iterable[str],
+                 _progress: Optional[Callable] = None) -> Result:
+    src_path = Path(src)
+    _progress.emit({'pbar_max': len(shapes)})
+
+    del_count = 0
+    for idx, shape in enumerate(shapes, 1):
+        for p in src_path.glob(shape):
+            p.unlink(missing_ok=True)
+            del_count += 1
+        _progress.emit({'pbar': idx})
+
+    if del_count:
+        return Result.success(f"Έγινε διαγραφή {del_count} αρχείων")
+    return Result.warning("Δεν διαγράφτηκε κανένα αρχείο")
