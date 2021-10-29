@@ -76,5 +76,12 @@ class KtimaPaths(PathEngine):
             return _path
         return _path.as_posix()
 
+    def get_databases(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("Geodatabases")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
 
 paths = KtimaPaths(appname=APPNAME)

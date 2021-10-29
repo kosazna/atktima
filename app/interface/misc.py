@@ -17,7 +17,7 @@ from at.path import PathEngine
 from at.result import Result
 from atktima.app.core import (create_empty_shapes, create_metadata,
                               get_organized_server_files, get_shapes,
-                              get_unorganized_server_files)
+                              get_unorganized_server_files, forest)
 from atktima.app.settings import *
 from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
@@ -42,15 +42,10 @@ class MiscTab(QWidget):
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
-        path_mapping = {'ParadosiData': paths.get_paradosidata()}
 
         layout = QVBoxLayout()
         layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
-        mdbLayout = QHBoxLayout()
-        metadataLayout = QHBoxLayout()
-        listLayout = QHBoxLayout()
-        buttonLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
                               label=state['fullname'],
@@ -64,68 +59,18 @@ class MiscTab(QWidget):
         self.meleti = Label(icon='layers-fill',
                             label=state['meleti'],
                             parent=self)
-        self.mdbFolder = FolderInput(label="Βάσεις",
-                                     labelsize=(90, 24),
-                                     parent=self)
-        self.checkMdbOrganized = CheckInput(label="Οργανωμένες",
-                                            checked=False,
-                                            parent=self)
-        self.dateMetadata = StrInput(label='Ημερομηνία Metadata',
-                                     labelsize=(135, 24),
-                                     editsize=(100, 24),
-                                     parent=self)
-        self.selectorMetadata = StrSelector(label="Δομή Metadata",
-                                            labelsize=(90, 24),
-                                            editsize=(200, 24),
-                                            mapping=METADATA_MAPPING,
-                                            parent=self)
-        self.selectorSpatial = StrSelector(label="Δομή Χωρικών",
-                                           labelsize=(90, 24),
-                                           editsize=(200, 24),
-                                           mapping=LOCAL_MAPPING,
-                                           parent=self)
-        self.folderOutput = PathSelector(label="Φάκελος που θα δημιουργηθεί η παράδοση",
-                                         selectortype='folder_in',
-                                         mapping=path_mapping,
-                                         orientation=VERTICAL,
-                                         combosize=(180, 24),
-                                         labelsize=(None, 24),
-                                         parent=self)
-        self.shape = ListWidget(label="Επιλογή Χωρικών",
-                                widgetsize=(None, 200),
+        self.claims = FileInput(label="Αρχείο excel με διεκδίκηση",
+                                orientation=VERTICAL,
+                                labelsize=(250, 24),
                                 parent=self)
-        self.otas = ListWidget(label="Επιλογή ΟΤΑ",
-                               widgetsize=(None, 200),
-                               parent=self)
-        self.makeAll = Button("Φόρτωση Όλων",
-                              color='blue',
-                              size=(130, 30),
-                              parent=self)
-        self.makeSpatial = Button("Φόρτωση Χωρικών",
-                                  size=(130, 24),
-                                  parent=self)
-        self.makeEmpty = Button("Φόρτωση Κενών",
-                                size=(130, 24),
+        self.active = FileInput(label="Αρχείο excel με ενεργά δασικά",
+                                orientation=VERTICAL,
+                                labelsize=(250, 24),
                                 parent=self)
-        self.makeMetadata = Button("Φόρτωση Metadata",
-                                   size=(130, 24),
-                                   parent=self)
-        self.makeMdbs = Button("Φόρτωση Βάσεων",
-                               size=(130, 24),
-                               parent=self)
-        self.progress = ProgressBar(parent=self)
+        self.makeForest = Button("Δημιουργία FOREST",
+                                 size=(150, 30),
+                                 parent=self)
         self.status = StatusButton(parent=self)
-
-        self.dateMetadata.setPlaceholder("dd/mm/yyyy")
-        self.folderOutput.setCurrentText("ParadosiData")
-        selectorsKey = state[state['meleti']]['type']
-        self.selectorMetadata.setCurrentText(selectorsKey)
-        self.selectorSpatial.setCurrentText(selectorsKey)
-        self.shape.addItems(db.get_shapes(state['meleti']))
-        self.otas.addItems(db.get_ota_per_meleti_company(
-            state['meleti'], state['company']))
-        self.shape.hideButtons()
-        self.otas.hideButtons()
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -133,30 +78,11 @@ class MiscTab(QWidget):
         labelLayout.addWidget(self.meleti)
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
-        layout.addWidget(self.folderOutput)
-        layout.addWidget(HLine())
-        listLayout.addWidget(self.shape)
-        listLayout.addWidget(self.otas)
-        layout.addLayout(listLayout)
-        layout.addWidget(HLine())
-        mdbLayout.addWidget(self.mdbFolder)
-        mdbLayout.addWidget(self.checkMdbOrganized)
-        layout.addLayout(mdbLayout)
-        metadataLayout.addWidget(self.selectorMetadata)
-        metadataLayout.addWidget(self.dateMetadata,
-                                 stretch=2, alignment=Qt.AlignLeft)
-        layout.addLayout(metadataLayout)
-        layout.addWidget(self.selectorSpatial)
-        layout.addWidget(HLine())
-        buttonLayout.addWidget(self.makeAll)
-        buttonLayout.addWidget(self.makeSpatial)
-        buttonLayout.addWidget(self.makeMdbs)
-        buttonLayout.addWidget(self.makeEmpty)
-        buttonLayout.addWidget(self.makeMetadata)
-        layout.addLayout(buttonLayout)
-        layout.addWidget(HLine(), stretch=2, alignment=Qt.AlignTop)
-        layout.addWidget(self.progress)
-        layout.addWidget(self.status)
+        layout.addWidget(self.claims)
+        layout.addWidget(self.active)
+        layout.addWidget(self.makeForest, stretch=2, alignment=Qt.AlignRight)
+
+        layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
 
@@ -190,7 +116,16 @@ class MiscTab(QWidget):
 
     def updateFinish(self):
         pass
-    
+
+    def makeForest(self, _progress):
+        claims = self.claims.getText()
+        active = self.active.getText()
+        output = paths.get_databases()
+
+        return forest(claims=claims,
+                      active_forest=active,
+                      output=output,
+                      _progress=_progress)
 
 
 if __name__ == '__main__':

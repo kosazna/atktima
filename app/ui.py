@@ -36,6 +36,7 @@ class KtimaUI(QWidget):
         self.setObjectName("MainWidget")
         self.setStyleSheet(cssGuide)
         self.setWindowTitle(f"{state['appname']}")
+        self.move(300, 150)
 
         set_size(widget=self, size=size)
 
