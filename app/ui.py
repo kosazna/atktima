@@ -36,13 +36,13 @@ class KtimaUI(QWidget):
         self.setObjectName("MainWidget")
         self.setStyleSheet(cssGuide)
         self.setWindowTitle(f"{state['appname']}")
-        self.move(300, 150)
+        self.move(260, 150)
 
         set_size(widget=self, size=size)
 
         self.appLayout = QHBoxLayout()
 
-        self.console = Console(size=(600, None), parent=self)
+        self.console = Console(size=(700, None), parent=self)
 
         self.tabs = QTabWidget(parent=self)
         self.tabs.setDocumentMode(True)

@@ -9,6 +9,7 @@ import pandas as pd
 from at.auth.client import Authorize, AuthStatus, licensed
 from at.auth.utils import load_lic
 from at.gui.components import *
+from at.gui.components import combo
 from at.gui.utils import HORIZONTAL, VERTICAL, set_size
 from at.gui.worker import run_thread
 from at.io.copyfuncs import batch_copy_file, copy_file
@@ -71,23 +72,25 @@ class ParadosiTab(QWidget):
                             label=state['meleti'],
                             parent=self)
         self.mdbFolder = FolderInput(label="Βάσεις",
-                                     labelsize=(90, 24),
+                                     labelsize=(100, 24),
                                      parent=self)
         self.checkMdbOrganized = CheckInput(label="Οργανωμένες",
                                             checked=False,
                                             parent=self)
-        self.dateMetadata = StrInput(label='Ημερομηνία Metadata',
-                                     labelsize=(135, 24),
+        self.dateMetadata = StrInput(label='Ημερομηνία',
+                                     labelsize=(100, 24),
                                      editsize=(100, 24),
                                      parent=self)
         self.selectorMetadata = StrSelector(label="Δομή Metadata",
-                                            labelsize=(90, 24),
-                                            editsize=(200, 24),
+                                            labelsize=(100, 24),
+                                            combosize=(100, 24),
+                                            editsize=(250, 24),
                                             mapping=METADATA_MAPPING,
                                             parent=self)
         self.selectorSpatial = StrSelector(label="Δομή Χωρικών",
-                                           labelsize=(90, 24),
-                                           editsize=(200, 24),
+                                           labelsize=(100, 24),
+                                           combosize=(100, 24),
+                                           editsize=(250, 24),
                                            mapping=LOCAL_MAPPING,
                                            parent=self)
         self.folderOutput = PathSelector(label="Φάκελος που θα δημιουργηθεί η παράδοση",
