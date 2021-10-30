@@ -187,6 +187,8 @@ class OrganizeTab(QWidget):
             _save_name = None
 
         if files:
+            log.success(
+                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
             copy_pattern_from_files(files=files,
                                     dst=dst,
                                     read_pattern=read_pattern,
