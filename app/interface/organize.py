@@ -11,7 +11,7 @@ from at.auth.utils import load_lic
 from at.gui.components import *
 from at.gui.utils import VERTICAL, set_size
 from at.gui.worker import run_thread
-from at.io.copyfuncs import copy_pattern
+from at.io.copyfuncs import copy_pattern, copy_pattern_from_files
 from at.logger import log
 from at.path import PathEngine
 from at.result import Result
@@ -37,6 +37,7 @@ class OrganizeTab(QWidget):
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
         self.buttonFilterTest.subscribe(self.onTestFilter)
+        self.buttonPatternTest.subscribe(self.onTestPattern)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -94,6 +95,9 @@ class OrganizeTab(QWidget):
         self.buttonFilterTest = Button(label='Δοκιμή Φίλτρου',
                                        size=(180, 30),
                                        parent=self)
+        self.buttonPatternTest = Button(label='Δοκιμή Μοτίβου',
+                                       size=(180, 30),
+                                       parent=self)
         self.status = StatusButton(parent=self)
 
         labelLayout.addWidget(self.fullname)
@@ -117,6 +121,7 @@ class OrganizeTab(QWidget):
         layout.addWidget(HLine())
         buttonLayout.addWidget(self.buttonCopy)
         buttonLayout.addWidget(self.buttonFilterTest)
+        buttonLayout.addWidget(self.buttonPatternTest)
         layout.addLayout(buttonLayout)
         layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
@@ -150,13 +155,47 @@ class OrganizeTab(QWidget):
         files = file_filter.search(folder, keep)
 
         if files:
-            log.success(f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+            log.success(
+                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
             for f in files:
                 log.info(str(f))
         else:
-            log.error(f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+            log.error(
+                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
 
-        
+    def onTestPattern(self):
+        src = self.inputFolder.getText()
+        file_filter = self.filters.getFilterObject()
+        filter_str = self.filters.getText()
+        keep = self.filters.getKeepValue()
+        files = file_filter.search(src, keep)
+
+        read_pattern = self.inputPattern.getText()
+        dst = self.ouputFolder.getText()
+
+        save_pattern = self.outputPattern.getText()
+        save_name = self.outputName.getText()
+
+        if save_pattern:
+            _save_pattern = save_pattern
+        else:
+            _save_pattern = None
+
+        if save_name:
+            _save_name = save_name
+        else:
+            _save_name = None
+
+        if files:
+            copy_pattern_from_files(files=files,
+                                    dst=dst,
+                                    read_pattern=read_pattern,
+                                    save_pattern=_save_pattern,
+                                    save_name=_save_name,
+                                    mode='test')
+        else:
+            log.error(
+                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
 
 
 if __name__ == '__main__':
