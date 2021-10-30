@@ -36,6 +36,7 @@ class OrganizeTab(QWidget):
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
+        self.buttonFilterTest.subscribe(self.onTestFilter)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -70,8 +71,10 @@ class OrganizeTab(QWidget):
                                         combosize=(200, 24),
                                         editsize=(300, 24),
                                         parent=self)
-        self.inputFilters = StrInput("Φίλτρα")
-        self.checkRecursive = CheckInput("Εύρεση σε υποφακέλους")
+        # self.inputFilters = StrInput("Φίλτρα")
+        # self.checkRecursive = CheckInput("Εύρεση σε υποφακέλους")
+
+        self.filters = FilterFileSelector("Φίλτρα")
 
         self.ouputFolder = PathSelector(label="Απόθεση σε",
                                         labelsize=(180, 24),
@@ -88,6 +91,9 @@ class OrganizeTab(QWidget):
         self.buttonCopy = Button(label='Αντιγραφή',
                                  size=(180, 30),
                                  parent=self)
+        self.buttonFilterTest = Button(label='Δοκιμή Φίλτρου',
+                                       size=(180, 30),
+                                       parent=self)
         self.status = StatusButton(parent=self)
 
         labelLayout.addWidget(self.fullname)
@@ -97,9 +103,10 @@ class OrganizeTab(QWidget):
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
         inputLayout.addWidget(self.inputFolder)
-        inputFilterLayout.addWidget(self.inputFilters)
-        inputFilterLayout.addWidget(self.checkRecursive)
-        inputLayout.addLayout(inputFilterLayout)
+        # inputFilterLayout.addWidget(self.inputFilters)
+        # inputFilterLayout.addWidget(self.checkRecursive)
+        # inputLayout.addLayout(inputFilterLayout)
+        inputLayout.addWidget(self.filters)
         inputLayout.addWidget(self.inputPattern)
         layout.addLayout(inputLayout)
         layout.addWidget(HLine())
@@ -109,6 +116,7 @@ class OrganizeTab(QWidget):
         layout.addLayout(outputLayout)
         layout.addWidget(HLine())
         buttonLayout.addWidget(self.buttonCopy)
+        buttonLayout.addWidget(self.buttonFilterTest)
         layout.addLayout(buttonLayout)
         layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
@@ -133,6 +141,22 @@ class OrganizeTab(QWidget):
                             save_name=save_name,
                             recursive=recursive,
                             verbose=True)
+
+    def onTestFilter(self):
+        file_filter = self.filters.getFilterObject()
+        filter_str = self.filters.getText()
+        folder = self.inputFolder.getText()
+        keep = self.filters.getKeepValue()
+        files = file_filter.search(folder, keep)
+
+        if files:
+            log.success(f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+            for f in files:
+                log.info(str(f))
+        else:
+            log.error(f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+
+        
 
 
 if __name__ == '__main__':
