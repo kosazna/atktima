@@ -344,6 +344,7 @@ class ParadosiTab(QWidget):
         are_organized = self.checkMdbOrganized.isChecked()
         user_otas = self.otas.getCheckState()
         paradosi_structure = self.selectorSpatial.getText()
+        all_otas = db.get_ota_per_meleti(state['meleti'])
 
         if are_organized:
             validation = self.validate('loadMdbs-organized')
@@ -352,6 +353,7 @@ class ParadosiTab(QWidget):
             return get_organized_server_files(src=mdb_folder,
                                               dst=paradosi_folder,
                                               otas=user_otas,
+                                              all_otas=all_otas,
                                               _progress=_progress)
         else:
             validation = self.validate('loadMdbs-unorganized')

@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Callable, Iterable, Optional, Union
 
 from at.io.copyfuncs import copy_file
+from at.io.object import FilterObject
 from at.io.utils import zip_file
 from at.result import Result
 from at.text import replace_all
@@ -13,6 +14,7 @@ from atktima.app.settings import *
 def get_organized_server_files(src: Union[str, Path],
                                dst: Union[str, Path],
                                otas: Iterable[str],
+                               all_otas=Iterable[str],
                                _progress: Optional[Callable] = None) -> Result:
 
     src_path = Path(src)
@@ -29,16 +31,19 @@ def get_organized_server_files(src: Union[str, Path],
             copy_file(p, zip_dst)
             _progress.emit({'pbar': idx})
 
+    ignored_otas = FilterObject(
+        filters=[ota for ota in all_otas if ota not in otas])
+
     _progress.emit({'status': 'Αντιγραφή mdb: GEITONES'})
     geitones_src = src_path.joinpath('GEITONES')
     geitones_dst = dst_path.joinpath(f"{OTHER}")
-    copy_file(geitones_src, geitones_dst)
+    copy_file(geitones_src, geitones_dst, ignore=ignored_otas)
 
     forest_src = src_path.joinpath('FOREST')
     if forest_src.exists():
         _progress.emit({'status': 'Αντιγραφή mdb: FOREST'})
         forest_dst = dst_path.joinpath(f"{OTHER}")
-        copy_file(forest_src, forest_dst)
+        copy_file(forest_src, forest_dst, ignore=ignored_otas)
 
     spatial_src = src_path.joinpath('SHAPE')
     if spatial_src.exists():
