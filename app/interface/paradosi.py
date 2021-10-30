@@ -84,13 +84,13 @@ class ParadosiTab(QWidget):
         self.selectorMetadata = StrSelector(label="Δομή Metadata",
                                             labelsize=(100, 24),
                                             combosize=(100, 24),
-                                            editsize=(250, 24),
+                                            editsize=(260, 24),
                                             mapping=METADATA_MAPPING,
                                             parent=self)
         self.selectorSpatial = StrSelector(label="Δομή Χωρικών",
                                            labelsize=(100, 24),
                                            combosize=(100, 24),
-                                           editsize=(250, 24),
+                                           editsize=(260, 24),
                                            mapping=LOCAL_MAPPING,
                                            parent=self)
         self.folderOutput = PathSelector(label="Φάκελος που θα δημιουργηθεί η παράδοση",
