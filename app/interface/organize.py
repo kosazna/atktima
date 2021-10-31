@@ -38,6 +38,7 @@ class OrganizeTab(QWidget):
         self.popup = Popup(state['appname'])
         self.buttonFilterTest.subscribe(self.onTestFilter)
         self.buttonPatternTest.subscribe(self.onTestPattern)
+        self.buttonCopy.subscribe(self.onCopyPattern)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -46,9 +47,9 @@ class OrganizeTab(QWidget):
         layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
         inputLayout = QVBoxLayout()
-        inputFilterLayout = QHBoxLayout()
         outputLayout = QVBoxLayout()
-        buttonLayout = QHBoxLayout()
+        buttonLayout = QVBoxLayout()
+        buttonTestLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
                               label=state['fullname'],
@@ -62,7 +63,6 @@ class OrganizeTab(QWidget):
         self.meleti = Label(icon='layers-fill',
                             label=state['meleti'],
                             parent=self)
-
         self.inputFolder = PathSelector(label="Εύρεση σε",
                                         labelsize=(180, 24),
                                         mapping={},
@@ -72,11 +72,7 @@ class OrganizeTab(QWidget):
                                         combosize=(200, 24),
                                         editsize=(300, 24),
                                         parent=self)
-        # self.inputFilters = StrInput("Φίλτρα")
-        # self.checkRecursive = CheckInput("Εύρεση σε υποφακέλους")
-
         self.filters = FilterFileSelector("Φίλτρα")
-
         self.ouputFolder = PathSelector(label="Απόθεση σε",
                                         labelsize=(180, 24),
                                         mapping={},
@@ -90,15 +86,19 @@ class OrganizeTab(QWidget):
                                    parent=self)
 
         self.buttonCopy = Button(label='Αντιγραφή',
-                                 size=(180, 30),
+                                 color='blue',
+                                 size=(200, 30),
                                  parent=self)
         self.buttonFilterTest = Button(label='Δοκιμή Φίλτρου',
                                        size=(180, 30),
                                        parent=self)
         self.buttonPatternTest = Button(label='Δοκιμή Μοτίβου',
-                                       size=(180, 30),
-                                       parent=self)
+                                        size=(180, 30),
+                                        parent=self)
         self.status = StatusButton(parent=self)
+
+        self.outputName.setPlaceholder("Προαιρετικό όνομα αποθήκευσης")
+        self.filters.recursive.setText("Εύρεση σε υποφακέλους")
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -107,9 +107,6 @@ class OrganizeTab(QWidget):
         layout.addLayout(labelLayout)
         layout.addWidget(HLine())
         inputLayout.addWidget(self.inputFolder)
-        # inputFilterLayout.addWidget(self.inputFilters)
-        # inputFilterLayout.addWidget(self.checkRecursive)
-        # inputLayout.addLayout(inputFilterLayout)
         inputLayout.addWidget(self.filters)
         inputLayout.addWidget(self.inputPattern)
         layout.addLayout(inputLayout)
@@ -119,35 +116,157 @@ class OrganizeTab(QWidget):
         outputLayout.addWidget(self.outputPattern)
         layout.addLayout(outputLayout)
         layout.addWidget(HLine())
-        buttonLayout.addWidget(self.buttonCopy)
-        buttonLayout.addWidget(self.buttonFilterTest)
-        buttonLayout.addWidget(self.buttonPatternTest)
+        buttonTestLayout.addWidget(self.buttonFilterTest)
+        buttonTestLayout.addWidget(self.buttonPatternTest)
+        buttonLayout.addLayout(buttonTestLayout)
+        buttonLayout.addWidget(self.buttonCopy, alignment=Qt.AlignCenter)
         layout.addLayout(buttonLayout)
         layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
 
-    @licensed(appname=state['appname'], category=state['meleti'])
-    def copyFiles(self, _progress):
-        filters = parse_filters(self.inputFilters.getText())
+    def updateProgress(self, metadata: dict):
+        if metadata:
+            progress_now = metadata.get('pbar', None)
+            progress_max = metadata.get('pbar_max', None)
+            status = metadata.get('status', None)
+
+            if progress_now is not None:
+                self.progress.setValue(progress_now)
+            if progress_max is not None:
+                self.progress.setMaximum(progress_max)
+            if status is not None:
+                self.status.disable(str(status))
+
+    def updateResult(self, status: Any):
+        if status is not None:
+            if isinstance(status, AuthStatus):
+                if not status.authorised:
+                    self.popup.error(status.msg)
+            elif isinstance(status, Result):
+                if status.result == Result.ERROR:
+                    self.popup.error(status.msg)
+                elif status.result == Result.WARNING:
+                    self.popup.warning(status.msg, **status.details)
+                else:
+                    self.popup.info(status.msg, **status.details)
+            else:
+                self.popup.info(status)
+
+    def updateFinish(self):
+        pass
+
+    def validate(self, funcname: str):
         src = self.inputFolder.getText()
+        filter_str = self.filters.getText()
+
         read_pattern = self.inputPattern.getText()
-        dst = self.outputPattern.getText()
+        dst = self.ouputFolder.getText()
+        save_pattern = self.outputPattern.getText()
+
+        probs = []
+
+        if funcname == 'onTestPattern':
+            if not src or not Path(src).exists():
+                probs.append("-Δεν βρέθηκε φάκελος προέλευσης")
+            if not filter_str:
+                probs.append("-Δεν βρέθηκε φίλτρο")
+            if not read_pattern:
+                probs.append("-Δεν βρέθηκε δομή προέλευσης")
+            if not dst or not Path(dst).exists():
+                probs.append("-Δεν βρέθηκε φάκελος προορισμού")
+            if not save_pattern:
+                probs.append("-Δεν βρέθηκε δομή προορισμού")
+        elif funcname == 'onTestFilter':
+            if not src or not Path(src).exists():
+                probs.append("-Δεν βρέθηκε φάκελος προέλευσης")
+            if not filter_str:
+                probs.append("-Δεν βρέθηκε φίλτρο")
+        elif funcname == 'copyFiles':
+            if not src or not Path(src).exists():
+                probs.append("-Δεν βρέθηκε φάκελος προέλευσης")
+            if not filter_str:
+                probs.append("-Δεν βρέθηκε φίλτρο")
+            if not read_pattern:
+                probs.append("-Δεν βρέθηκε δομή προέλευσης")
+            if not dst or not Path(dst).exists():
+                probs.append("-Δεν βρέθηκε φάκελος προορισμού")
+            if not save_pattern:
+                probs.append("-Δεν βρέθηκε δομή προορισμού")
+
+        if probs:
+            details = '\n'.join(probs)
+            return Result.warning('Προσδιόρισε όλες τις απαραίτητες παραμέτρους',
+                                  details={'secondary': details})
+        return None
+
+    def onCopyPattern(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.copyPattern,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
+    def onTestFilter(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.testFilter,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
+    def onTestPattern(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.testPattern,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def copyPattern(self, _progress):
+        validation = self.validate('copyFiles')
+        if validation is not None:
+            return validation
+
+        src = self.inputFolder.getText()
+        file_filter = self.filters.getFilterObject()
+        filter_str = self.filters.getText()
+        keep = self.filters.getKeepValue()
+        files = file_filter.search(src, keep)
+        read_pattern = self.inputPattern.getText()
+        dst = self.ouputFolder.getText()
         save_pattern = self.outputPattern.getText()
         save_name = self.outputName.getText()
 
-        recursive = self.checkRecursive.isChecked()
+        if save_pattern:
+            _save_pattern = save_pattern
+        else:
+            _save_pattern = None
 
-        return copy_pattern(src=src,
-                            dst=dst,
-                            filters=filters,
-                            read_pattern=read_pattern,
-                            save_pattern=save_pattern,
-                            save_name=save_name,
-                            recursive=recursive,
-                            verbose=True)
+        if save_name:
+            _save_name = save_name
+        else:
+            _save_name = None
 
-    def onTestFilter(self):
+        if files:
+            log.success(
+                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+            return copy_pattern_from_files(files=files,
+                                           dst=dst,
+                                           read_pattern=read_pattern,
+                                           save_pattern=_save_pattern,
+                                           save_name=_save_name,
+                                           verbose=True,
+                                           mode='execute')
+        else:
+            log.error(
+                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def testFilter(self, _progress):
+        validation = self.validate('onTestFilter')
+        if validation is not None:
+            return validation
+
         file_filter = self.filters.getFilterObject()
         filter_str = self.filters.getText()
         folder = self.inputFolder.getText()
@@ -163,16 +282,19 @@ class OrganizeTab(QWidget):
             log.error(
                 f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
 
-    def onTestPattern(self):
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def testPattern(self, _progress):
+        validation = self.validate('onTestPattern')
+        if validation is not None:
+            return validation
+
         src = self.inputFolder.getText()
         file_filter = self.filters.getFilterObject()
         filter_str = self.filters.getText()
         keep = self.filters.getKeepValue()
         files = file_filter.search(src, keep)
-
         read_pattern = self.inputPattern.getText()
         dst = self.ouputFolder.getText()
-
         save_pattern = self.outputPattern.getText()
         save_name = self.outputName.getText()
 
