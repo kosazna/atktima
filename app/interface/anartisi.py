@@ -161,6 +161,27 @@ class AnartisiTab(QWidget):
     def updateFinish(self):
         pass
 
+    def validate(self, funcname: str):
+        src = self.apospasmata.getText()
+        dst = self.organized.getText()
+        mapping_file = self.mapping.getText()
+
+        probs = []
+
+        if funcname == 'makeAnartisi':
+            if not src or not Path(src).exists():
+                probs.append("-Δεν βρέθηκε φάκελος με αποσπάσματα")
+            if not mapping_file or not Path(mapping_file).exists():
+                probs.append("-Δεν βρέθηκε αρχείο excel με αντιστοιχίσεις")
+            if not dst:
+                probs.append("-Δεν βρέθηκε φάκελος οργάνωσης")
+
+        if probs:
+            details = '\n'.join(probs)
+            return Result.warning('Προσδιόρισε όλες τις απαραίτητες παραμέτρους',
+                                  details={'secondary': details})
+        return None
+
     def onAnartisi(self):
         run_thread(threadpool=self.threadpool,
                    function=self.makeAnartisi,
@@ -170,6 +191,10 @@ class AnartisiTab(QWidget):
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def makeAnartisi(self, _progress):
+        validation = self.validate('makeAnartisi')
+        if validation is not None:
+            return validation
+
         src = self.apospasmata.getText()
         dst = self.organized.getText()
         mapping_file = self.mapping.getText()
@@ -179,23 +204,14 @@ class AnartisiTab(QWidget):
         col_page = self.page.getCurrentText()
         col_tk = self.tk.getCurrentText()
 
-        if all([bool(src),
-                bool(dst),
-                bool(mapping_file),
-                bool(col_filename),
-                bool(col_region),
-                bool(col_page),
-                bool(col_tk)]):
-            return anartisi(src=src,
-                            dst=dst,
-                            mapping_file=mapping_file,
-                            col_filename=col_filename,
-                            col_region=col_region,
-                            col_page=col_page,
-                            col_tk=col_tk,
-                            _progress=_progress)
-        else:
-            return Result.error("Κάποια από τις κατηγορίες δεν είναι συμπληρωμένη")
+        return anartisi(src=src,
+                        dst=dst,
+                        mapping_file=mapping_file,
+                        col_filename=col_filename,
+                        col_region=col_region,
+                        col_page=col_page,
+                        col_tk=col_tk,
+                        _progress=_progress)
 
 
 if __name__ == '__main__':

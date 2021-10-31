@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from concurrent.futures.thread import _threads_queues
 import sys
 from os import path
 from pathlib import Path
@@ -39,6 +40,7 @@ class MiscTab(QWidget):
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
+        self.buttonMakeForest.subscribe(self.onMakeForest)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -67,10 +69,18 @@ class MiscTab(QWidget):
                                 orientation=VERTICAL,
                                 labelsize=(250, 24),
                                 parent=self)
-        self.makeForest = Button("Δημιουργία FOREST",
-                                 size=(150, 30),
-                                 parent=self)
+        # self.shape = ListWidget(label="Επιλογή Χωρικών",
+        #                         parent=self)
+        # self.otas = ListWidget(label="Επιλογή ΟΤΑ",
+        #                        parent=self)
+        self.buttonMakeForest = Button("Δημιουργία FOREST",
+                                       size=(150, 30),
+                                       parent=self)
         self.status = StatusButton(parent=self)
+
+        # self.shape.addItems(db.get_shapes(state['meleti'], mdb=_threads_queues))
+        # self.otas.addItems(db.get_ota_per_meleti_company(
+        #     state['meleti'], state['company']))
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -80,7 +90,8 @@ class MiscTab(QWidget):
         layout.addWidget(HLine())
         layout.addWidget(self.claims)
         layout.addWidget(self.active)
-        layout.addWidget(self.makeForest, stretch=2, alignment=Qt.AlignRight)
+        layout.addWidget(self.buttonMakeForest, stretch=2,
+                         alignment=Qt.AlignRight)
 
         layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
@@ -117,7 +128,37 @@ class MiscTab(QWidget):
     def updateFinish(self):
         pass
 
+    def validate(self, funcname: str):
+        claims = self.claims.getText()
+        active = self.active.getText()
+
+        probs = []
+
+        if funcname == 'makeForest':
+            if not claims or not Path(claims).exists():
+                probs.append("-Δεν βρέθηκε αρχείο excel διεκδίκησης")
+            if not active or not Path(active).exists():
+                probs.append("-Δεν βρέθηκε αρχείο excel ενεργών δασικών")
+
+        if probs:
+            details = '\n'.join(probs)
+            return Result.warning('Προσδιόρισε όλες τις απαραίτητες παραμέτρους',
+                                  details={'secondary': details})
+        return None
+
+    def onMakeForest(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.makeForest,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
+    @licensed(appname=state['appname'], category=state['meleti'])
     def makeForest(self, _progress):
+        validation = self.validate('makeForest')
+        if validation is not None:
+            return validation
+
         claims = self.claims.getText()
         active = self.active.getText()
         output = paths.get_databases()

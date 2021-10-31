@@ -71,28 +71,32 @@ class KtimaUI(QWidget):
 
     @pyqtSlot()
     def onSettingsUpdate(self):
+        mel_shapes = db.get_shapes(state['meleti'])
+        mel_otas = db.get_ota_per_meleti_company(state['meleti'],
+                                                 state['company'])
+        melType = state[state['meleti']]['type']
+
+        all_path_mapping = {'LocalData': paths.get_localdata(),
+                            'ParadosiData': paths.get_paradosidata(),
+                            'Other...': ''}
+        paradosi_path_mapping = {'ParadosiData': paths.get_paradosidata(),
+                                 'Other...': ''}
+
         self.filesTab.meleti.setText(state['meleti'])
         self.filesTab.fullname.setText(state['fullname'])
         self.filesTab.company.setText(state['company'])
         self.filesTab.shape.clearContent()
-        self.filesTab.shape.addItems(db.get_shapes(state['meleti']))
+        self.filesTab.shape.addItems(mel_shapes)
         self.filesTab.otas.clearContent()
-        self.filesTab.otas.addItems(db.get_ota_per_meleti_company(
-            state['meleti'], state['company']))
-        melType = state[state['meleti']]['type']
+        self.filesTab.otas.addItems(mel_otas)
         self.filesTab.localWidget.setCurrentText(melType)
-        # self.filesTab.companyOtaCombo.clearItems()
-        # self.filesTab.companyOtaCombo.addItems(state[state['meleti']]['company'].keys())
+
         self.countTab.meleti.setText(state['meleti'])
         self.countTab.fullname.setText(state['fullname'])
         self.countTab.company.setText(state['company'])
         self.countTab.refreshShapes()
         self.countTab.folder.clearItems()
-        path_mapping = {'LocalData': paths.get_localdata(),
-                        'ParadosiData': paths.get_paradosidata(),
-                        'Other...': ''}
-        self.countTab.folder.addItems(path_mapping)
-        self.countTab.folder.setCurrentText('LocalData')
+        self.countTab.folder.addItems(all_path_mapping)
 
         self.organizeTab.meleti.setText(state['meleti'])
         self.organizeTab.fullname.setText(state['fullname'])
@@ -101,6 +105,12 @@ class KtimaUI(QWidget):
         self.paradosiTab.meleti.setText(state['meleti'])
         self.paradosiTab.fullname.setText(state['fullname'])
         self.paradosiTab.company.setText(state['company'])
+        self.paradosiTab.folderOutput.clearItems()
+        self.paradosiTab.folderOutput.addItems(paradosi_path_mapping)
+        self.paradosiTab.shape.clearContent()
+        self.paradosiTab.shape.addItems(mel_shapes)
+        self.paradosiTab.otas.clearContent()
+        self.paradosiTab.otas.addItems(mel_otas)
         self.paradosiTab.selectorMetadata.setCurrentText(melType)
         self.paradosiTab.selectorSpatial.setCurrentText(melType)
 

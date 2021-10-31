@@ -80,13 +80,6 @@ class FilesTab(QWidget):
                                  color='blue',
                                  size=(180, 30),
                                  parent=self)
-        # self.serverCombo = ComboInput(label="Δομή Server",
-        #                               labelsize=(80, 24),
-        #                               items=['<ota>/SHP',
-        #                                      '<ota>/SHP/<shape>',
-        #                                      'Άλλο...'],
-        #                               combosize=(200, 24),
-        #                               parent=self)
         self.serverWidget = StrSelector(label="Δομή Προέλευσης",
                                         mapping=SERVER_MAPPING,
                                         labelsize=(120, 24),
