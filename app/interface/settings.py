@@ -11,6 +11,7 @@ from at.gui.worker import run_thread
 from at.logger import log
 from at.result import Result
 from atktima.app.utils import db, paths, state
+from atktima.app.core import create_mel_folder
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
@@ -37,7 +38,9 @@ class SettingsTab(QWidget):
         self.saveButton.subscribe(self.onSave)
         self.dbButton.subscribe(lambda: db.open_db(paths.get_db_exe()))
         self.licButton.subscribe(self.onLicUpload)
+        self.createButton.subscribe(self.onCreateMeleti)
         self.meletes.subscribe(self.onMeletiChanged)
+        self.createMeletes.subscribe(self.onCreateMeletiChanged)
 
         self.kthmadata.lineEdit.textChanged.connect(self.areSettingsChanged)
         self.kthmatemp.lineEdit.textChanged.connect(self.areSettingsChanged)
@@ -56,6 +59,7 @@ class SettingsTab(QWidget):
         buttonLayout = QHBoxLayout()
         templayout = QHBoxLayout()
         licLayout = QHBoxLayout()
+        createLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
                               label=state['fullname'],
@@ -110,14 +114,27 @@ class SettingsTab(QWidget):
                                icon='server',
                                size=(120, 26),
                                parent=self)
+        self.createMeletes = ComboInput(label="Μελέτη",
+                                        combosize=(100, 24),
+                                        items=state['all_mel_codes'],
+                                        parent=self)
+        self.createButton = Button(label="Δημιουργία φακέλου",
+                                   size=(140, 26),
+                                   parent=self)
+        self.folderStatus = StatusLabel(icon='hdd-network-fill',
+                                        statussize=(110, 24),
+                                        parent=self)
+
         self.status = StatusButton(parent=self)
 
         self.meletes.setCurrentText(state['meleti'])
+        self.createMeletes.setCurrentText(state['meleti'])
         self.kthmatemp.setText(state['kthmatemp'])
         self.kthmadata.setText(state['kthmadata'])
         self.fullnameInsert.setText(state['fullname'])
         self.companyInsert.setText(state['company'])
         self.saveButton.disable()
+        self.onCreateMeletiChanged()
         self.checkServer()
 
         labelLayout.addWidget(self.fullname)
@@ -145,6 +162,12 @@ class SettingsTab(QWidget):
         buttonLayout.addWidget(self.saveButton, alignment=Qt.AlignRight)
         buttonLayout.addWidget(self.dbButton)
         layout.addLayout(buttonLayout)
+        layout.addWidget(HLine())
+        createLayout.addWidget(self.createMeletes)
+        createLayout.addWidget(
+            self.folderStatus, stretch=2, alignment=Qt.AlignLeft)
+        createLayout.addWidget(self.createButton)
+        layout.addLayout(createLayout)
         layout.addWidget(HLine())
         licLayout.addWidget(self.lic)
         licLayout.addWidget(self.licButton)
@@ -220,6 +243,13 @@ class SettingsTab(QWidget):
         self.areSettingsChanged()
         self.status.disable()
 
+    def onCreateMeletiChanged(self):
+        mel = self.createMeletes.getCurrentText()
+        if Path(f"C:/{mel}").exists():
+            self.folderStatus.changeStatus("Προσβάσιμο", 'statusOk')
+        else:
+            self.folderStatus.changeStatus("Μη Προσβάσιμο", 'statusError')
+
     def onLicUpload(self):
         run_thread(threadpool=self.threadpool,
                    function=self.licUploadAction,
@@ -227,9 +257,23 @@ class SettingsTab(QWidget):
                    on_result=self.updateResult,
                    on_finish=self.updateFinish)
 
+    def onCreateMeleti(self):
+        run_thread(threadpool=self.threadpool,
+                   function=self.createMeleti,
+                   on_update=self.updateProgress,
+                   on_result=self.updateResult,
+                   on_finish=self.updateFinish)
+
     def licUploadAction(self, _progress):
         src = self.lic.getText()
         return load_lic(filepath=src, dst=paths.get_authfolder())
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def createMeleti(self, _progress):
+        meleti = self.createMeletes.getCurrentText()
+        template_folder = paths.get_mel_template()
+        return create_mel_folder(template_folder=template_folder,
+                                 meleti=meleti)
 
     def onSave(self):
         state['meleti'] = self.pickedMeleti

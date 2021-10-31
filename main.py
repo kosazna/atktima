@@ -3,6 +3,7 @@ import ctypes
 import sys
 
 from at.gui.utils import get_dpi
+from at.logger import log
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QApplication
 
@@ -18,6 +19,8 @@ if __name__ == "__main__":
         SEGOE = QFont(FONT, FONTSIZE)
     else:
         SEGOE = QFont(FONT, FONTSIZE - 1)
+
+    log.set_mode("GUI")
 
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(APPICON))

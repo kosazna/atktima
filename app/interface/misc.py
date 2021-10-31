@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from concurrent.futures.thread import _threads_queues
 import sys
 from os import path
 from pathlib import Path
@@ -16,9 +15,7 @@ from at.io.copyfuncs import batch_copy_file, copy_file
 from at.logger import log
 from at.path import PathEngine
 from at.result import Result
-from atktima.app.core import (create_empty_shapes, create_metadata,
-                              get_organized_server_files, get_shapes,
-                              get_unorganized_server_files, forest)
+from atktima.app.core import forest, make_folders
 from atktima.app.settings import *
 from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
@@ -41,6 +38,7 @@ class MiscTab(QWidget):
         self.threadpool = QThreadPool(parent=self)
         self.popup = Popup(state['appname'])
         self.buttonMakeForest.subscribe(self.onMakeForest)
+        self.buttonMakeFolders.subscribe(self.onMakeFolders)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
@@ -48,6 +46,8 @@ class MiscTab(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(2, 4, 2, 0)
         labelLayout = QHBoxLayout()
+        patternButtonLayout = QHBoxLayout()
+        listLayout = QHBoxLayout()
 
         self.fullname = Label(icon='person-fill',
                               label=state['fullname'],
@@ -69,18 +69,30 @@ class MiscTab(QWidget):
                                 orientation=VERTICAL,
                                 labelsize=(250, 24),
                                 parent=self)
-        # self.shape = ListWidget(label="Επιλογή Χωρικών",
-        #                         parent=self)
-        # self.otas = ListWidget(label="Επιλογή ΟΤΑ",
-        #                        parent=self)
         self.buttonMakeForest = Button("Δημιουργία FOREST",
-                                       size=(150, 30),
+                                       size=(140, 24),
                                        parent=self)
+        self.makeFolder = FolderInput(label="Προορισμός",
+                                      parent=self)
+        self.shape = ListWidget(label="Επιλογή Χωρικών",
+                                parent=self)
+        self.otas = ListWidget(label="Επιλογή ΟΤΑ",
+                               parent=self)
+        self.schema = StrSelector(label="Δομή Προορισμού",
+                                  mapping=LOCAL_MAPPING,
+                                  combosize=(100, 24),
+                                  editsize=(300, 24),
+                                  labelsize=(120, 24),
+                                  parent=self)
+        self.buttonMakeFolders = Button("Δημιουργία φακέλων",
+                                        size=(140, 24),
+                                        parent=self)
+
         self.status = StatusButton(parent=self)
 
-        # self.shape.addItems(db.get_shapes(state['meleti'], mdb=_threads_queues))
-        # self.otas.addItems(db.get_ota_per_meleti_company(
-        #     state['meleti'], state['company']))
+        self.shape.addItems(db.get_shapes(state['meleti'], mdb=True))
+        self.otas.addItems(db.get_ota_per_meleti_company(
+            state['meleti'], state['company']))
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -92,6 +104,14 @@ class MiscTab(QWidget):
         layout.addWidget(self.active)
         layout.addWidget(self.buttonMakeForest, stretch=2,
                          alignment=Qt.AlignRight)
+        layout.addWidget(HLine())
+        layout.addWidget(self.makeFolder)
+        listLayout.addWidget(self.shape)
+        listLayout.addWidget(self.otas)
+        layout.addLayout(listLayout)
+        patternButtonLayout.addWidget(self.schema)
+        patternButtonLayout.addWidget(self.buttonMakeFolders)
+        layout.addLayout(patternButtonLayout)
 
         layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
@@ -131,6 +151,10 @@ class MiscTab(QWidget):
     def validate(self, funcname: str):
         claims = self.claims.getText()
         active = self.active.getText()
+        local_folder = self.makeFolder.getText()
+        user_shapes = self.shape.getCheckState()
+        user_otas = self.otas.getCheckState()
+        local_structure = self.schema.getText()
 
         probs = []
 
@@ -139,6 +163,15 @@ class MiscTab(QWidget):
                 probs.append("-Δεν βρέθηκε αρχείο excel διεκδίκησης")
             if not active or not Path(active).exists():
                 probs.append("-Δεν βρέθηκε αρχείο excel ενεργών δασικών")
+        elif funcname == 'makeFolders':
+            if not local_folder or not Path(local_folder).exists():
+                probs.append("-Δεν βρέθηκε ο φάκελος προορισμού")
+            if not local_structure:
+                probs.append("-Δεν βρέθηκε δομή προορισμού")
+            if not user_shapes:
+                probs.append("-Δεν βρέθηκε επιλογή χωρικών")
+            if not user_otas:
+                probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
 
         if probs:
             details = '\n'.join(probs)
@@ -149,6 +182,13 @@ class MiscTab(QWidget):
     def onMakeForest(self):
         return run_thread(threadpool=self.threadpool,
                           function=self.makeForest,
+                          on_update=self.updateProgress,
+                          on_result=self.updateResult,
+                          on_finish=self.updateFinish)
+
+    def onMakeFolders(self):
+        return run_thread(threadpool=self.threadpool,
+                          function=self.makeFolders,
                           on_update=self.updateProgress,
                           on_result=self.updateResult,
                           on_finish=self.updateFinish)
@@ -167,6 +207,23 @@ class MiscTab(QWidget):
                       active_forest=active,
                       output=output,
                       _progress=_progress)
+
+    @licensed(appname=state['appname'], category=state['meleti'])
+    def makeFolders(self, _progress):
+        validation = self.validate('makeFolders')
+        if validation is not None:
+            return validation
+
+        local_folder = self.makeFolder.getText()
+        user_shapes = self.shape.getCheckState()
+        user_otas = self.otas.getCheckState()
+        local_structure = self.schema.getText()
+
+        return make_folders(dst=local_folder,
+                            otas=user_otas,
+                            shapes=user_shapes,
+                            dst_schema=local_structure,
+                            _progress=_progress)
 
 
 if __name__ == '__main__':

@@ -15,7 +15,6 @@ from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,
 
 
 cssGuide = paths.get_css(obj=True).joinpath("_style.css").read_text()
-log.set_mode("GUI")
 paths.set_attrs(state['meleti'], state['kthmadata'], state['kthmatemp'])
 
 
@@ -117,6 +116,15 @@ class KtimaUI(QWidget):
         self.anartisiTab.meleti.setText(state['meleti'])
         self.anartisiTab.fullname.setText(state['fullname'])
         self.anartisiTab.company.setText(state['company'])
+
+        self.miscTab.meleti.setText(state['meleti'])
+        self.miscTab.fullname.setText(state['fullname'])
+        self.miscTab.company.setText(state['company'])
+        self.miscTab.shape.clearContent()
+        self.miscTab.shape.addItems(mel_shapes)
+        self.miscTab.otas.clearContent()
+        self.miscTab.otas.addItems(mel_otas)
+        self.miscTab.schema.setCurrentText(melType)
 
         self.check_auth()
 

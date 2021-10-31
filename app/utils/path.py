@@ -83,5 +83,12 @@ class KtimaPaths(PathEngine):
             return _path
         return _path.as_posix()
 
+    def get_mel_template(self, obj: bool = False):
+        _path = self.get_kthmatemp(obj=True).joinpath("! aznavouridis.k/Diafora/ktima")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
 
 paths = KtimaPaths(appname=APPNAME)
