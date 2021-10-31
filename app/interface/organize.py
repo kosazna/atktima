@@ -84,6 +84,10 @@ class OrganizeTab(QWidget):
                                          parent=self)
         self.outputName = StrInput(label="Με όνομα",
                                    parent=self)
+        self.counter = StatusLabel(label="Πλήθος αρχείων",
+                                   labelsize=(120, 24),
+                                   statussize=(100, 24),
+                                   parent=self)
 
         self.buttonCopy = Button(label='Αντιγραφή',
                                  color='blue',
@@ -116,6 +120,8 @@ class OrganizeTab(QWidget):
         outputLayout.addWidget(self.outputPattern)
         layout.addLayout(outputLayout)
         layout.addWidget(HLine())
+        buttonTestLayout.addWidget(
+            self.counter, stretch=2, alignment=Qt.AlignLeft)
         buttonTestLayout.addWidget(self.buttonFilterTest)
         buttonTestLayout.addWidget(self.buttonPatternTest)
         buttonLayout.addLayout(buttonTestLayout)
@@ -130,6 +136,7 @@ class OrganizeTab(QWidget):
             progress_now = metadata.get('pbar', None)
             progress_max = metadata.get('pbar_max', None)
             status = metadata.get('status', None)
+            count = metadata.get('count', None)
 
             if progress_now is not None:
                 self.progress.setValue(progress_now)
@@ -137,6 +144,8 @@ class OrganizeTab(QWidget):
                 self.progress.setMaximum(progress_max)
             if status is not None:
                 self.status.disable(str(status))
+            if count is not None:
+                self.setCount(count)
 
     def updateResult(self, status: Any):
         if status is not None:
@@ -155,6 +164,9 @@ class OrganizeTab(QWidget):
 
     def updateFinish(self):
         pass
+
+    def setCount(self, count: int):
+        self.counter.setText(str(count))
 
     def validate(self, funcname: str):
         src = self.inputFolder.getText()
@@ -232,6 +244,7 @@ class OrganizeTab(QWidget):
         filter_str = self.filters.getText()
         keep = self.filters.getKeepValue()
         files = file_filter.search(src, keep)
+        nfiles = len(files)
         read_pattern = self.inputPattern.getText()
         dst = self.ouputFolder.getText()
         save_pattern = self.outputPattern.getText()
@@ -247,9 +260,11 @@ class OrganizeTab(QWidget):
         else:
             _save_name = None
 
+        _progress.emit({'count': nfiles})
+
         if files:
             log.success(
-                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+                f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
             return copy_pattern_from_files(files=files,
                                            dst=dst,
                                            read_pattern=read_pattern,
@@ -259,7 +274,7 @@ class OrganizeTab(QWidget):
                                            mode='execute')
         else:
             log.error(
-                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+                f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def testFilter(self, _progress):
@@ -272,15 +287,18 @@ class OrganizeTab(QWidget):
         folder = self.inputFolder.getText()
         keep = self.filters.getKeepValue()
         files = file_filter.search(folder, keep)
+        nfiles = len(files)
+
+        _progress.emit({'count': nfiles})
 
         if files:
             log.success(
-                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+                f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
             for f in files:
                 log.info(str(f))
         else:
             log.error(
-                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+                f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
 
     @licensed(appname=state['appname'], category=state['meleti'])
     def testPattern(self, _progress):
@@ -293,6 +311,7 @@ class OrganizeTab(QWidget):
         filter_str = self.filters.getText()
         keep = self.filters.getKeepValue()
         files = file_filter.search(src, keep)
+        nfiles = len(files)
         read_pattern = self.inputPattern.getText()
         dst = self.ouputFolder.getText()
         save_pattern = self.outputPattern.getText()
@@ -308,9 +327,11 @@ class OrganizeTab(QWidget):
         else:
             _save_name = None
 
+        _progress.emit({'count': nfiles})
+
         if files:
             log.success(
-                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+                f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
             copy_pattern_from_files(files=files,
                                     dst=dst,
                                     read_pattern=read_pattern,
@@ -319,7 +340,7 @@ class OrganizeTab(QWidget):
                                     mode='test')
         else:
             log.error(
-                f"\nΑρχεία: {len(files)} | Αποτελέσματα φίλτρου: {filter_str}\n")
+                f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
 
 
 if __name__ == '__main__':
