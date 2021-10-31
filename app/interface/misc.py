@@ -94,6 +94,9 @@ class MiscTab(QWidget):
         self.otas.addItems(db.get_ota_per_meleti_company(
             state['meleti'], state['company']))
 
+        self.shape.hideButtons()
+        self.otas.hideButtons()
+
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
         labelLayout.addWidget(self.company, stretch=2, alignment=Qt.AlignLeft)
@@ -104,6 +107,7 @@ class MiscTab(QWidget):
         layout.addWidget(self.active)
         layout.addWidget(self.buttonMakeForest, stretch=2,
                          alignment=Qt.AlignRight)
+        layout.addWidget(HLine())
         layout.addWidget(HLine())
         layout.addWidget(self.makeFolder)
         listLayout.addWidget(self.shape)
@@ -168,8 +172,6 @@ class MiscTab(QWidget):
                 probs.append("-Δεν βρέθηκε ο φάκελος προορισμού")
             if not local_structure:
                 probs.append("-Δεν βρέθηκε δομή προορισμού")
-            if not user_shapes:
-                probs.append("-Δεν βρέθηκε επιλογή χωρικών")
             if not user_otas:
                 probs.append("-Δεν βρέθηκε επιλογή ΟΤΑ")
 

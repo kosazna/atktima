@@ -58,8 +58,14 @@ def make_folders(dst: Union[str, Path],
     folder_count = 0
 
     for ota in otas:
-        for shape in shapes:
-            sub_dst = replace_all(dst_schema,  {'shape': shape, 'ota': ota})
+        if shapes:
+            for shape in shapes:
+                sub_dst = replace_all(dst_schema,  {'shape': shape, 'ota': ota})
+                _dst = dst_path.joinpath(sub_dst)
+                _dst.mkdir(parents=True, exist_ok=True)
+                folder_count += 1
+        else:
+            sub_dst = replace_all(dst_schema,  {'ota': ota})
             _dst = dst_path.joinpath(sub_dst)
             _dst.mkdir(parents=True, exist_ok=True)
             folder_count += 1
