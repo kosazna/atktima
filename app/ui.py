@@ -71,6 +71,7 @@ class KtimaUI(QWidget):
     @pyqtSlot()
     def onSettingsUpdate(self):
         mel_shapes = db.get_shapes(state['meleti'])
+        mel_shapes_mdb = db.get_shapes(state['meleti'], mdb=True)
         mel_otas = db.get_ota_per_meleti_company(state['meleti'],
                                                  state['company'])
         melType = state[state['meleti']]['type']
@@ -121,7 +122,7 @@ class KtimaUI(QWidget):
         self.miscTab.fullname.setText(state['fullname'])
         self.miscTab.company.setText(state['company'])
         self.miscTab.shape.clearContent()
-        self.miscTab.shape.addItems(mel_shapes)
+        self.miscTab.shape.addItems(mel_shapes_mdb)
         self.miscTab.otas.clearContent()
         self.miscTab.otas.addItems(mel_otas)
         self.miscTab.schema.setCurrentText(melType)

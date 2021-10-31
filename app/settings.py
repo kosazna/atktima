@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 
+from at.utils import user
+from pathlib import Path
+
 APPNAME = "ktima"
 VERSION = "10.1.1"
 DEBUG = False
-APPICON = "atktima.ico"
+USERNAME = user()
 FONT = "Segoe UI"
 FONTSIZE = 9
+ICONNAME = "atktima.ico"
+
+if Path(f"C:/Users/{USERNAME}/.ktima/static/atktima.ico").exists():
+    APPICON = f"C:/Users/{USERNAME}/.ktima/static/{ICONNAME}"
+else:
+    APPICON = ICONNAME
 
 DATABASES = "ΕΝΔΙΑΜΕΣΗ ΥΠΟΒΟΛΗ ΚΤΗΜΑΤΟΛΟΓΙΚΗΣ ΒΑΣΗΣ ΠΕΡΙΓΡΑΦΙΚΩΝ ΣΤΟΙΧΕΙΩΝ"
 SPATIAL = "ΕΝΔΙΑΜΕΣΗ ΥΠΟΒΟΛΗ ΚΤΗΜΑΤΟΛΟΓΙΚΗΣ ΒΑΣΗΣ ΧΩΡΙΚΩΝ ΣΤΟΙΧΕΙΩΝ"
