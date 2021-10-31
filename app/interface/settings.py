@@ -114,7 +114,8 @@ class SettingsTab(QWidget):
                                icon='server',
                                size=(120, 26),
                                parent=self)
-        self.createMeletes = ComboInput(label="Μελέτη",
+        self.createMeletes = ComboInput(label="Φάκελος μελέτης",
+                                        labelsize=(120, 24),
                                         combosize=(100, 24),
                                         items=state['all_mel_codes'],
                                         parent=self)
