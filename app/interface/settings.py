@@ -10,6 +10,7 @@ from at.gui.utils import set_size
 from at.gui.worker import run_thread
 from at.logger import log
 from at.result import Result
+from at.io.utils import load_json, write_json
 from atktima.app.utils import db, paths, state
 from atktima.app.core import create_mel_folder
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
@@ -290,9 +291,25 @@ class SettingsTab(QWidget):
 
         state.update_db()
         self.saveButton.disable()
+
+        self.updateJsonFile()
+
         self.settingsChanged.emit()
 
         self.popup.info("Οι ρυθμίσεις αποθηκεύτηκαν")
+
+    def updateJsonFile(self):
+        jsonfile = paths.get_static(True).joinpath("paths.json")
+        jsondata = load_json(jsonfile)
+        username = state['username']
+        kthmatemp = state['kthmatemp'][0]
+        kthmadata = state['kthmadata'][0]
+
+        jsondata['temp'][username] = kthmatemp
+        jsondata['data'][username] = kthmadata
+        jsondata['users'][username] = username
+
+        write_json(jsonfile, jsondata)
 
 
 if __name__ == '__main__':
