@@ -11,7 +11,7 @@ FONT = "Segoe UI"
 FONTSIZE = 9
 ICONNAME = "ktima.ico"
 
-if Path(f"C:/Users/{USERNAME}/.ktima/static/atktima.ico").exists():
+if Path(f"C:/Users/{USERNAME}/.ktima/static/{ICONNAME}").exists():
     APPICON = f"C:/Users/{USERNAME}/.ktima/static/{ICONNAME}"
 else:
     APPICON = ICONNAME
