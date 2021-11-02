@@ -156,7 +156,6 @@ class MiscTab(QWidget):
         claims = self.claims.getText()
         active = self.active.getText()
         local_folder = self.makeFolder.getText()
-        user_shapes = self.shape.getCheckState()
         user_otas = self.otas.getCheckState()
         local_structure = self.schema.getText()
 
@@ -204,6 +203,9 @@ class MiscTab(QWidget):
         claims = self.claims.getText()
         active = self.active.getText()
         output = paths.get_databases(True).joinpath('FOREST.xlsx')
+
+        if not paths.get_databases(True).exists():
+            return Result.error(f"Δεν υπάρχει φάκελος μελέτης {state['meleti']}")
 
         return forest(claims=claims,
                       active_forest=active,
