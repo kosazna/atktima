@@ -5,9 +5,9 @@ from typing import Optional, Tuple
 from at.gui.components import Console
 from at.gui.utils import set_size
 from at.logger import log
+from atktima.app.utils import auth, db, paths, state
 from atktima.app.interface import (AnartisiTab, CountTab, FilesTab, MiscTab,
                                    OrganizeTab, ParadosiTab, SettingsTab)
-from atktima.app.utils import auth, db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,
