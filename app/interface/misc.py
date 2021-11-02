@@ -203,7 +203,7 @@ class MiscTab(QWidget):
 
         claims = self.claims.getText()
         active = self.active.getText()
-        output = paths.get_databases()
+        output = paths.get_databases(True).joinpath('FOREST.xlsx')
 
         return forest(claims=claims,
                       active_forest=active,
