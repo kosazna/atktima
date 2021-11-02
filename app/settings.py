@@ -9,7 +9,7 @@ DEBUG = False
 USERNAME = user()
 FONT = "Segoe UI"
 FONTSIZE = 9
-ICONNAME = "atktima.ico"
+ICONNAME = "ktima.ico"
 
 if Path(f"C:/Users/{USERNAME}/.ktima/static/atktima.ico").exists():
     APPICON = f"C:/Users/{USERNAME}/.ktima/static/{ICONNAME}"
