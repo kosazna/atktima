@@ -22,8 +22,8 @@ OTHER = "ΣΥΝΗΜΜΕΝΑ ΑΡΧΕΙΑ"
 
 SERVER_MAPPING = {"NAMA Server": '<ota>/SHP',
                   "2KP Server": '<ota>/SHP/<shape>',
-                  "Άλλη παράδοση (ktima11)": '<ota>/SHAPE/<shape>',
-                  "Άλλη παράδοση (ktima16)": '<ota>/<shape>'}
+                  "ktima11 - Άλλη παράδοση": '<ota>/SHAPE/<shape>',
+                  "ktima16 - Άλλη παράδοση": '<ota>/<shape>'}
 
 LOCAL_MAPPING = {"ktima16": '<ota>/<shape>',
                  "ktima11": '<ota>/SHAPE/<shape>'}
@@ -37,11 +37,11 @@ ORGANIZE_FILTER = {"Ανακτήσεις": ('files', 'endwith', '.zip'),
 
 ORGANIZE_READ_SCHEMA = {"ktima16 - Φάκελοι": '<ota$2><shape$1>',
                         "ktima11 - Φάκελοι": '<ota$3><shape$1>',
-                        "ΟΤΑ-Shape": "<ota>_<shape>",
+                        "ΟΤΑ - Shape": "<ota>_<shape>",
                         "Ανακτήσεις": '<ota@10:14>',
-                        "Σαρωμένα (Δηλώσεις)": '<ota@2:6>',
-                        "Σαρωμένα (Έγγραφα)": '<ota@1:5>'}
+                        "Σαρωμένα - Δηλώσεις": '<ota@2:6>',
+                        "Σαρωμένα - Έγγραφα": '<ota@1:5>'}
 
 ORGANIZE_SAVE_SCHEMA = {"Ανά ΟΤΑ": '<ota>',
-                        "ktima16": '<ota>/<shape>',
-                        "ktima11": '<ota>/SHAPE/<shape>'}
+                        "ktima16 - Χωρικά": '<ota>/<shape>',
+                        "ktima11 - Χωρικά": '<ota>/SHAPE/<shape>'}

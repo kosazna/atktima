@@ -90,7 +90,7 @@ class OrganizeTab(QWidget):
         self.outputName = StrInput(label="Με όνομα",
                                    parent=self)
         self.counter = StatusLabel(label="Πλήθος αρχείων",
-                                   labelsize=(120, 24),
+                                   labelsize=(100, 24),
                                    statussize=(100, 24),
                                    parent=self)
 
@@ -99,10 +99,10 @@ class OrganizeTab(QWidget):
                                  size=(200, 30),
                                  parent=self)
         self.buttonFilterTest = Button(label='Δοκιμή Φίλτρου',
-                                       size=(180, 30),
+                                       size=(150, 24),
                                        parent=self)
         self.buttonPatternTest = Button(label='Δοκιμή Μοτίβου',
-                                        size=(180, 30),
+                                        size=(150, 24),
                                         parent=self)
         self.status = StatusButton(parent=self)
 
