@@ -90,5 +90,33 @@ class KtimaPaths(PathEngine):
             return _path
         return _path.as_posix()
 
+    def get_anaktiseis_in(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("!InputData/Anaktiseis")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+    
+    def get_anaktiseis_out(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("!OutputData/Anaktiseis")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
+    def get_saromena_in(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("!InputData/Saromena")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+    
+    def get_saromena_out(self, obj: bool = False):
+        _path = self.get_meleti(obj=True).joinpath("!OutputData/Saromena")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
 
 paths = KtimaPaths(appname=APPNAME)

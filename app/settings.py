@@ -30,3 +30,18 @@ LOCAL_MAPPING = {"ktima16": '<ota>/<shape>',
 
 METADATA_MAPPING = {"ktima16": '<ota>',
                     "ktima11": '<ota>/METADATA'}
+
+ORGANIZE_FILTER = {"Ανακτήσεις": ('files', 'endwith', '.zip'),
+                   "Σαρωμένα": ('files', 'endwith', '.tif|.tiff'),
+                   "Χωρικά": ('files', 'endwith', '.shp')}
+
+ORGANIZE_READ_SCHEMA = {"ktima16 - Φάκελοι": '<ota$2><shape$1>',
+                        "ktima11 - Φάκελοι": '<ota$3><shape$1>',
+                        "ΟΤΑ-Shape": "<ota>_<shape>",
+                        "Ανακτήσεις": '<ota@10:14>',
+                        "Σαρωμένα (Δηλώσεις)": '<ota@2:6>',
+                        "Σαρωμένα (Έγγραφα)": '<ota@1:5>'}
+
+ORGANIZE_SAVE_SCHEMA = {"Ανά ΟΤΑ": '<ota>',
+                        "ktima16": '<ota>/<shape>',
+                        "ktima11": '<ota>/SHAPE/<shape>'}

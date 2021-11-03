@@ -82,6 +82,14 @@ class KtimaUI(QWidget):
         paradosi_path_mapping = {'ParadosiData': paths.get_paradosidata(),
                                  'Other...': ''}
 
+        organizeInputFolders = {"Ανακτήσεις": paths.get_anaktiseis_in(),
+                                "Σαρωμένα": paths.get_saromena_in(),
+                                'Other...': ''}
+        organizeOutputFolders = {"Ανακτήσεις": paths.get_anaktiseis_out(),
+                                 "Σαρωμένα": paths.get_saromena_out(),
+                                 "Χωρικά": paths.get_localdata(),
+                                 'Other...': ''}
+
         self.filesTab.meleti.setText(state['meleti'])
         self.filesTab.fullname.setText(state['fullname'])
         self.filesTab.company.setText(state['company'])
@@ -101,6 +109,10 @@ class KtimaUI(QWidget):
         self.organizeTab.meleti.setText(state['meleti'])
         self.organizeTab.fullname.setText(state['fullname'])
         self.organizeTab.company.setText(state['company'])
+        self.organizeTab.inputFolder.clearItems()
+        self.organizeTab.inputFolder.addItems(organizeInputFolders)
+        self.organizeTab.ouputFolder.clearItems()
+        self.organizeTab.ouputFolder.addItems(organizeOutputFolders)
 
         self.paradosiTab.meleti.setText(state['meleti'])
         self.paradosiTab.fullname.setText(state['fullname'])

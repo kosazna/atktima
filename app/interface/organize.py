@@ -16,6 +16,8 @@ from at.logger import log
 from at.path import PathEngine
 from at.result import Result
 from at.text import parse_filters
+from atktima.app.settings import (ORGANIZE_FILTER, ORGANIZE_READ_SCHEMA,
+                                  ORGANIZE_SAVE_SCHEMA)
 from atktima.app.utils import db, paths, state
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -39,9 +41,16 @@ class OrganizeTab(QWidget):
         self.buttonFilterTest.subscribe(self.onTestFilter)
         self.buttonPatternTest.subscribe(self.onTestPattern)
         self.buttonCopy.subscribe(self.onCopyPattern)
+        self.inputFolder.subscribe(self.onInputSelectorChange)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
+
+        inputFolders = {"Ανακτήσεις": paths.get_anaktiseis_in(),
+                        "Σαρωμένα": paths.get_saromena_in()}
+        outputFolders = {"Ανακτήσεις": paths.get_anaktiseis_out(),
+                         "Σαρωμένα": paths.get_saromena_out(),
+                         "Χωρικά": paths.get_localdata()}
 
         layout = QVBoxLayout()
         layout.setContentsMargins(2, 4, 2, 0)
@@ -64,21 +73,23 @@ class OrganizeTab(QWidget):
                             label=state['meleti'],
                             parent=self)
         self.inputFolder = PathSelector(label="Εύρεση σε",
+                                        mapping=inputFolders,
                                         labelsize=(180, 24),
-                                        mapping={},
                                         orientation=VERTICAL,
                                         parent=self)
         self.inputPattern = StrSelector(label="Δομή",
+                                        mapping=ORGANIZE_READ_SCHEMA,
                                         combosize=(200, 24),
                                         editsize=(300, 24),
                                         parent=self)
-        self.filters = FilterFileSelector("Φίλτρα")
+        self.filters = FilterFileSelector("Φίλτρα", parent=self)
         self.ouputFolder = PathSelector(label="Απόθεση σε",
+                                        mapping=outputFolders,
                                         labelsize=(180, 24),
-                                        mapping={},
                                         orientation=VERTICAL,
                                         parent=self)
         self.outputPattern = StrSelector(label="Δομή",
+                                         mapping=ORGANIZE_SAVE_SCHEMA,
                                          combosize=(200, 24),
                                          editsize=(300, 24),
                                          parent=self)
@@ -103,6 +114,7 @@ class OrganizeTab(QWidget):
 
         self.outputName.setPlaceholder("Προαιρετικό όνομα αποθήκευσης")
         self.filters.recursive.setText("Εύρεση σε υποφακέλους")
+        self.onInputSelectorChange()
 
         labelLayout.addWidget(self.fullname)
         labelLayout.addWidget(self.username)
@@ -130,6 +142,18 @@ class OrganizeTab(QWidget):
         layout.addWidget(self.status, stretch=2, alignment=Qt.AlignBottom)
 
         self.setLayout(layout)
+
+    def onInputSelectorChange(self):
+        mode = self.inputFolder.getCurrentText()
+
+        if mode in ORGANIZE_FILTER:
+            _find = ORGANIZE_FILTER[mode][0]
+            _find_mode = ORGANIZE_FILTER[mode][1]
+            _what = ORGANIZE_FILTER[mode][2]
+
+            self.filters.setText(_find, _find_mode, _what)
+        else:
+            self.filters.setText('all', 'exact', '')
 
     def updateProgress(self, metadata: dict):
         if metadata:
