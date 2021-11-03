@@ -182,8 +182,8 @@ class FilesTab(QWidget):
                 elif status.result == Result.WARNING:
                     self.popup.warning(status.msg, **status.details)
                 else:
-                    self.popup.info(status.msg, **status.details)
                     self.filesCopied = True
+                    self.popup.info(status.msg, **status.details)
             else:
                 self.popup.info(status)
 
@@ -197,6 +197,7 @@ class FilesTab(QWidget):
                     status['ktima']['SHAPE'][shape] = False
 
             write_json(paths.get_json_status(), status)
+        self.filesCopied = False
 
     def validate(self, funcname: str):
         server_structure = self.serverWidget.getText()
