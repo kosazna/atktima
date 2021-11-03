@@ -94,7 +94,7 @@ class OrganizeTab(QWidget):
                                    statussize=(100, 24),
                                    parent=self)
 
-        self.buttonCopy = Button(label='Αντιγραφή',
+        self.buttonCopy = Button(label='Οργνάνωση Αρχείων',
                                  color='blue',
                                  size=(200, 30),
                                  parent=self)
