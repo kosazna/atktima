@@ -126,7 +126,6 @@ class ParadosiTab(QWidget):
         self.status = StatusButton(parent=self)
 
         self.dateMetadata.setPlaceholder("dd/mm/yyyy")
-        self.folderOutput.setCurrentText("ParadosiData")
         selectorsKey = state[state['meleti']]['type']
         self.selectorMetadata.setCurrentText(selectorsKey)
         self.selectorSpatial.setCurrentText(selectorsKey)

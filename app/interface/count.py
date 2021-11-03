@@ -83,8 +83,6 @@ class CountTab(QWidget):
                                     size=(180, 30),
                                     parent=self)
 
-        self.folder.setCurrentText('LocalData')
-
         for shape in db.get_shapes(state['meleti'], mdb=True):
             if shape != 'VSTEAS_REL':
                 _widget = StatusLabel(label=shape, status='0',

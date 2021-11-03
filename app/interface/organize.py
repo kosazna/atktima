@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
 import sys
-from os import path
 from pathlib import Path
-from time import sleep
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Tuple
 
-import pandas as pd
-from at.auth.client import Authorize, AuthStatus, licensed
-from at.auth.utils import load_lic
+from at.auth.client import AuthStatus, licensed
 from at.gui.components import *
 from at.gui.utils import VERTICAL, set_size
 from at.gui.worker import run_thread
-from at.io.copyfuncs import copy_pattern, copy_pattern_from_files
+from at.io.copyfuncs import copy_pattern_from_files
 from at.logger import log
-from at.path import PathEngine
 from at.result import Result
-from at.text import parse_filters
 from atktima.app.settings import (ORGANIZE_FILTER, ORGANIZE_READ_SCHEMA,
                                   ORGANIZE_SAVE_SCHEMA)
 from atktima.app.utils import db, paths, state
