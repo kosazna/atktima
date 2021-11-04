@@ -37,13 +37,19 @@ def get_organized_server_files(src: Union[str, Path],
     _progress.emit({'status': 'Αντιγραφή mdb: GEITONES'})
     geitones_src = src_path.joinpath('GEITONES')
     geitones_dst = dst_path.joinpath(f"{OTHER}")
-    copy_file(geitones_src, geitones_dst, ignore=ignored_otas)
+    copy_file(src=geitones_src,
+              dst=geitones_dst,
+              save_name='GEITONES',
+              ignore=ignored_otas)
 
     forest_src = src_path.joinpath('FOREST')
     if forest_src.exists():
         _progress.emit({'status': 'Αντιγραφή mdb: FOREST'})
         forest_dst = dst_path.joinpath(f"{OTHER}")
-        copy_file(forest_src, forest_dst, ignore=ignored_otas)
+        copy_file(src=forest_src,
+                  dst=forest_dst,
+                  save_name='FOREST',
+                  ignore=ignored_otas)
 
     spatial_src = src_path.joinpath('SHAPE')
     if spatial_src.exists():
