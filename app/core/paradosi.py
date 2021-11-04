@@ -169,10 +169,3 @@ def create_metadata(src: Union[str, Path],
         _progress.emit({'pbar': idx})
 
     _progress.emit({'status': 'Τα metadata δημιουργήθηκαν'})
-
-
-# create_empty_shapes(src="C:\KT2-11\!InputData\Shapefiles\Empty_Shapefiles",
-#                     dst="C:\KT2-11\!OutputData\ParadosiData",
-#                     otas=ot,
-#                     meleti_shapes=['ASTOTA', 'NOMI', 'OIK'],
-#                     local_schema="<ota>/SHAPE/<shape>")
