@@ -197,9 +197,9 @@ class CountTab(QWidget):
             self.popup.error("Δώσε φάκελο για καταμέτρηση")
 
     @licensed(appname=state['appname'], category=state['meleti'])
-    def findMissingFiles(self):
+    def findMissingFiles(self, *args, **kwargs):
         if self.missingShapes:
-            all_otas = db.get_ota_per_meleti(state['meleti'], 'NAMA')
+            all_otas = db.get_ota_per_meleti_company(state['meleti'], 'NAMA')
             folder = self.folder.getText()
             for shape in sorted(self.missingShapes):
                 all_file_parts = [p.parts for p in Path(
