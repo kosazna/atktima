@@ -83,9 +83,11 @@ class MiscTab(QWidget):
 
         self.status = StatusButton(parent=self)
 
+        selectorsKey = state[state['meleti']]['type']
         self.shape.addItems(db.get_shapes(state['meleti'], mdb=True))
         self.otas.addItems(db.get_ota_per_meleti_company(
             state['meleti'], state['company']))
+        self.schema.setCurrentText(selectorsKey)
 
         self.shape.hideButtons()
         self.otas.hideButtons()
