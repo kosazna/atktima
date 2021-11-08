@@ -4,7 +4,7 @@ from at.utils import user
 from pathlib import Path
 
 APPNAME = "ktima"
-VERSION = "10.1.2"
+VERSION = "10.1.5"
 DEBUG = False
 USERNAME = user()
 FONT = "Segoe UI"
