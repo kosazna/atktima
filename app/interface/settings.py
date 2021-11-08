@@ -11,7 +11,7 @@ from at.gui.worker import run_thread
 from at.logger import log
 from at.result import Result
 from at.io.utils import load_json, write_json
-from atktima.app.utils import db, paths, state
+from atktima.app.utils import db, paths, state, auth
 from atktima.app.core import create_mel_folder
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -101,7 +101,7 @@ class SettingsTab(QWidget):
                                            parent=self)
         self.meletes = ComboInput(label="Μελέτη",
                                   combosize=(100, 24),
-                                  items=state['all_mel_codes'],
+                                  items=auth.get_categories(),
                                   parent=self)
         self.lic = FileInput(label="Άδεια",
                              parent=self)
@@ -118,7 +118,7 @@ class SettingsTab(QWidget):
         self.createMeletes = ComboInput(label="Φάκελος μελέτης",
                                         labelsize=(120, 24),
                                         combosize=(100, 24),
-                                        items=state['all_mel_codes'],
+                                        items=auth.get_categories(),
                                         parent=self)
         self.createButton = Button(label="Δημιουργία φακέλου",
                                    size=(140, 26),

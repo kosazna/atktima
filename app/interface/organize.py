@@ -12,7 +12,7 @@ from at.logger import log
 from at.result import Result
 from atktima.app.settings import (ORGANIZE_FILTER, ORGANIZE_READ_SCHEMA,
                                   ORGANIZE_SAVE_SCHEMA)
-from atktima.app.utils import db, paths, state
+from atktima.app.utils import db, paths, state, auth
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
@@ -280,6 +280,11 @@ class OrganizeTab(QWidget):
 
         _progress.emit({'count': nfiles})
 
+        if "KT2-11" not in auth.get_categories():
+            ignore = db.get_ota_per_meleti_company("KT2-11", "NAMA")
+        else:
+            ignore = None
+
         if files:
             log.success(
                 f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
@@ -288,6 +293,7 @@ class OrganizeTab(QWidget):
                                            read_pattern=read_pattern,
                                            save_pattern=_save_pattern,
                                            save_name=_save_name,
+                                           ignore=ignore,
                                            verbose=True,
                                            mode='execute')
         else:
@@ -347,15 +353,21 @@ class OrganizeTab(QWidget):
 
         _progress.emit({'count': nfiles})
 
+        if "KT2-11" not in auth.get_categories():
+            ignore = db.get_ota_per_meleti_company("KT2-11", "NAMA")
+        else:
+            ignore = None
+
         if files:
             log.success(
                 f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
-            copy_pattern_from_files(files=files,
-                                    dst=dst,
-                                    read_pattern=read_pattern,
-                                    save_pattern=_save_pattern,
-                                    save_name=_save_name,
-                                    mode='test')
+            return copy_pattern_from_files(files=files,
+                                           dst=dst,
+                                           read_pattern=read_pattern,
+                                           save_pattern=_save_pattern,
+                                           save_name=_save_name,
+                                           ignore=ignore,
+                                           mode='test')
         else:
             log.error(
                 f"\nΑρχεία: {nfiles} | Αποτελέσματα φίλτρου: {filter_str}\n")
