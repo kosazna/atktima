@@ -31,16 +31,23 @@ LOCAL_MAPPING = {"ktima16": '<ota>/<shape>',
 METADATA_MAPPING = {"ktima16": '<ota>',
                     "ktima11": '<ota>/METADATA'}
 
-ORGANIZE_FILTER = {"Ανακτήσεις": ('files', 'endwith', '.zip'),
-                   "Σαρωμένα": ('files', 'endwith', '.tif|.tiff'),
-                   "Χωρικά": ('files', 'endwith', '.shp')}
+ORGANIZE_FILTER = {"Ανακτήσεις": '.zip',
+                   "Σαρωμένα - Δηλώσεις": '.tif|.tiff',
+                   "Σαρωμένα - Έγγραφα": '.tif|.tiff',
+                   "Excel": '.xls|.xlsx',
+                   "ktima16 - Φάκελοι": '.shp',
+                   "ktima11 - Φάκελοι": '.shp',
+                   "ΟΤΑ_Shape": '.shp',
+                   "ΟΤΑ-Shape": '.shp'}
 
-ORGANIZE_READ_SCHEMA = {"ktima16 - Φάκελοι": '<ota$2><shape$1>',
-                        "ktima11 - Φάκελοι": '<ota$3><shape$1>',
-                        "ΟΤΑ - Shape": "<ota>_<shape>",
-                        "Ανακτήσεις": '<ota@10:14>',
+ORGANIZE_READ_SCHEMA = {"Ανακτήσεις": '<ota@10:14>',
                         "Σαρωμένα - Δηλώσεις": '<ota@2:6>',
-                        "Σαρωμένα - Έγγραφα": '<ota@1:5>'}
+                        "Σαρωμένα - Έγγραφα": '<ota@1:5>',
+                        "Excel": '<ota>-',
+                        "ktima16 - Φάκελοι": '<ota$2><shape$1>',
+                        "ktima11 - Φάκελοι": '<ota$3><shape$1>',
+                        "ΟΤΑ_Shape": "<ota>_<shape>",
+                        "ΟΤΑ-Shape": "<ota>-<shape>"}
 
 ORGANIZE_SAVE_SCHEMA = {"Ανά ΟΤΑ": '<ota>',
                         "ktima16 - Χωρικά": '<ota>/<shape>',

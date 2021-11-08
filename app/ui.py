@@ -8,6 +8,7 @@ from at.logger import log
 from atktima.app.utils import auth, db, paths, state
 from atktima.app.interface import (AnartisiTab, CountTab, FilesTab, MiscTab,
                                    OrganizeTab, ParadosiTab, SettingsTab)
+from atktima.app.settings import *
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (QApplication, QHBoxLayout, QTabWidget,
@@ -84,10 +85,14 @@ class KtimaUI(QWidget):
 
         organizeInputFolders = {"Ανακτήσεις": paths.get_anaktiseis_in(),
                                 "Σαρωμένα": paths.get_saromena_in(),
+                                "Χωρικά": paths.get_localdata(),
                                 'Other...': ''}
         organizeOutputFolders = {"Ανακτήσεις": paths.get_anaktiseis_out(),
                                  "Σαρωμένα": paths.get_saromena_out(),
                                  "Χωρικά": paths.get_localdata(),
+                                 "Παράδοση - Περιγραφικά": paths.get_paradosidata(True).joinpath(DATABASES).as_posix(),
+                                 "Παράδοση - Χωρικά": paths.get_paradosidata(True).joinpath(SPATIAL).as_posix(),
+                                 "Παράδοση - Συνημμένα": paths.get_paradosidata(True).joinpath(OTHER).as_posix(),
                                  'Other...': ''}
 
         self.filesTab.meleti.setText(state['meleti'])

@@ -10,8 +10,7 @@ from at.gui.worker import run_thread
 from at.io.copyfuncs import copy_pattern_from_files
 from at.logger import log
 from at.result import Result
-from atktima.app.settings import (ORGANIZE_FILTER, ORGANIZE_READ_SCHEMA,
-                                  ORGANIZE_SAVE_SCHEMA)
+from atktima.app.settings import *
 from atktima.app.utils import db, paths, state, auth
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
@@ -35,16 +34,20 @@ class OrganizeTab(QWidget):
         self.buttonFilterTest.subscribe(self.onTestFilter)
         self.buttonPatternTest.subscribe(self.onTestPattern)
         self.buttonCopy.subscribe(self.onCopyPattern)
-        self.inputFolder.subscribe(self.onInputSelectorChange)
+        self.inputPattern.subscribe(self.onInputSelectorChange)
 
     def setupUi(self, size):
         set_size(widget=self, size=size)
 
         inputFolders = {"Ανακτήσεις": paths.get_anaktiseis_in(),
-                        "Σαρωμένα": paths.get_saromena_in()}
+                        "Σαρωμένα": paths.get_saromena_in(),
+                        "Χωρικά": paths.get_localdata()}
         outputFolders = {"Ανακτήσεις": paths.get_anaktiseis_out(),
                          "Σαρωμένα": paths.get_saromena_out(),
-                         "Χωρικά": paths.get_localdata()}
+                         "Χωρικά": paths.get_localdata(),
+                         "Παράδοση - Περιγραφικά": paths.get_paradosidata(True).joinpath(DATABASES).as_posix(),
+                         "Παράδοση - Χωρικά": paths.get_paradosidata(True).joinpath(SPATIAL).as_posix(),
+                         "Παράδοση - Συνημμένα": paths.get_paradosidata(True).joinpath(OTHER).as_posix()}
 
         layout = QVBoxLayout()
         layout.setContentsMargins(2, 4, 2, 0)
@@ -68,7 +71,8 @@ class OrganizeTab(QWidget):
                             parent=self)
         self.inputFolder = PathSelector(label="Εύρεση σε",
                                         mapping=inputFolders,
-                                        labelsize=(180, 24),
+                                        labelsize=(220, 24),
+                                        combosize=(180, 24),
                                         orientation=VERTICAL,
                                         parent=self)
         self.inputPattern = StrSelector(label="Δομή",
@@ -79,7 +83,8 @@ class OrganizeTab(QWidget):
         self.filters = FilterFileSelector("Φίλτρα", parent=self)
         self.ouputFolder = PathSelector(label="Απόθεση σε",
                                         mapping=outputFolders,
-                                        labelsize=(180, 24),
+                                        labelsize=(220, 24),
+                                        combosize=(180, 24),
                                         orientation=VERTICAL,
                                         parent=self)
         self.outputPattern = StrSelector(label="Δομή",
@@ -138,16 +143,14 @@ class OrganizeTab(QWidget):
         self.setLayout(layout)
 
     def onInputSelectorChange(self):
-        mode = self.inputFolder.getCurrentText()
+        mode = self.inputPattern.getCurrentText()
 
         if mode in ORGANIZE_FILTER:
-            _find = ORGANIZE_FILTER[mode][0]
-            _find_mode = ORGANIZE_FILTER[mode][1]
-            _what = ORGANIZE_FILTER[mode][2]
+            _filter = ORGANIZE_FILTER[mode]
 
-            self.filters.setText(_find, _find_mode, _what)
+            self.filters.setText(text=_filter)
         else:
-            self.filters.setText('all', 'exact', '')
+            self.filters.setText(text='')
 
     def updateProgress(self, metadata: dict):
         if metadata:
@@ -192,7 +195,6 @@ class OrganizeTab(QWidget):
 
         read_pattern = self.inputPattern.getText()
         dst = self.ouputFolder.getText()
-        save_pattern = self.outputPattern.getText()
 
         probs = []
 
@@ -205,8 +207,6 @@ class OrganizeTab(QWidget):
                 probs.append("-Δεν βρέθηκε δομή προέλευσης")
             if not dst or not Path(dst).exists():
                 probs.append("-Δεν βρέθηκε φάκελος προορισμού")
-            if not save_pattern:
-                probs.append("-Δεν βρέθηκε δομή προορισμού")
         elif funcname == 'onTestFilter':
             if not src or not Path(src).exists():
                 probs.append("-Δεν βρέθηκε φάκελος προέλευσης")
@@ -221,8 +221,6 @@ class OrganizeTab(QWidget):
                 probs.append("-Δεν βρέθηκε δομή προέλευσης")
             if not dst or not Path(dst).exists():
                 probs.append("-Δεν βρέθηκε φάκελος προορισμού")
-            if not save_pattern:
-                probs.append("-Δεν βρέθηκε δομή προορισμού")
 
         if probs:
             details = '\n'.join(probs)
