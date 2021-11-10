@@ -278,7 +278,7 @@ class SettingsTab(QWidget):
                                  meleti=meleti)
 
     def onSave(self):
-        state['meleti'] = self.pickedMeleti
+        state['meleti'] = self.meletes.getCurrentText()
         state['kthmatemp'] = self.kthmatemp.getText()
         state['kthmadata'] = self.kthmadata.getText()
         state['company'] = self.companyInsert.getText()
