@@ -2,10 +2,10 @@
 
 from pathlib import Path
 from typing import List, Union
-from atktima.app.utils.path import paths
+from atktima.app.utils.path import paths, KtimaPaths
 from at.database.utils import load_app_queries
-from at.database.object import QueryObject
-from at.database.sqlite import SQLiteEngine
+# from at.database.query import QueryObject
+from at.database.engine import SQLiteEngine
 from at.state import State
 from at.utils import user
 
@@ -16,7 +16,7 @@ app_queries = load_app_queries(paths.get_sql())
 class KtimaSQL(SQLiteEngine):
     def __init__(self,
                  db: Union[str, Path],
-                 app_paths: Union[List[QueryObject], None] = None) -> None:
+                 app_paths: Union[List[KtimaPaths], None] = None) -> None:
         super().__init__(db=db, app_paths=app_paths)
 
     def load_state(self):
@@ -40,8 +40,9 @@ class KtimaSQL(SQLiteEngine):
                                                           colname=True).set(username=username)
         result = self.select(query)
         if result is not None:
-            user_settings = dict(zip(result[0], result[1]))
-            return user_settings
+            # user_settings = dict(zip(result[0], result[1]))
+            # return user_settings
+            return result
         else:
             self.insert(app_queries['insert_user'].set(username=username))
             return self.get_user_settings()
@@ -49,7 +50,7 @@ class KtimaSQL(SQLiteEngine):
     def get_meleti_ota_info(self):
         meletes = {}
         query = app_queries['select_meletes'].attrs(fetch='rows')
-        meleti_code_name = db.select(query)
+        meleti_code_name = db.select(query, dictionary=False)
 
         query = app_queries['select_all_companies'].attrs(fetch='col')
         companies = db.select(query)
@@ -108,6 +109,8 @@ class KtimaSQL(SQLiteEngine):
 
 db = KtimaSQL(db=paths.get_db(), app_paths=paths)
 
+# print(db.get_meleti_ota_info())
+# print(db.get_user_settings())
 # print(db.get_meletes())
 # print(db.get_companies_per_meleti("KT5-16"))
 # print(db.get_ota_per_meleti("KT5-16"))

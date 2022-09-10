@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
-from at.path import PathEngine
 from pathlib import Path
+from typing import Optional
+
+from at.path import PathEngine
 from atktima.app.settings import *
 
 
@@ -56,14 +57,16 @@ class KtimaPaths(PathEngine):
         return _path.as_posix()
 
     def get_json_status(self, obj: bool = False):
-        _path = self.get_meleti(obj=True).joinpath("!InputData/Docs/KT_Status.json")
+        _path = self.get_meleti(obj=True).joinpath(
+            "!InputData/Docs/KT_Status.json")
 
         if obj:
             return _path
         return _path.as_posix()
 
     def get_empty_shapes(self, obj: bool = False):
-        _path = self.get_meleti(obj=True).joinpath("!InputData/Shapefiles/Empty_Shapefiles")
+        _path = self.get_meleti(obj=True).joinpath(
+            "!InputData/Shapefiles/Empty_Shapefiles")
 
         if obj:
             return _path
@@ -84,7 +87,8 @@ class KtimaPaths(PathEngine):
         return _path.as_posix()
 
     def get_mel_template(self, obj: bool = False):
-        _path = self.get_kthmatemp(obj=True).joinpath("! aznavouridis.k/Diafora/ktima")
+        _path = self.get_kthmatemp(obj=True).joinpath(
+            "! aznavouridis.k/Diafora/ktima")
 
         if obj:
             return _path
@@ -96,7 +100,7 @@ class KtimaPaths(PathEngine):
         if obj:
             return _path
         return _path.as_posix()
-    
+
     def get_anaktiseis_out(self, obj: bool = False):
         _path = self.get_meleti(obj=True).joinpath("!OutputData/Anaktiseis")
 
@@ -110,9 +114,16 @@ class KtimaPaths(PathEngine):
         if obj:
             return _path
         return _path.as_posix()
-    
+
     def get_saromena_out(self, obj: bool = False):
         _path = self.get_meleti(obj=True).joinpath("!OutputData/Saromena")
+
+        if obj:
+            return _path
+        return _path.as_posix()
+
+    def get_arcgis_paths(self, obj: bool = False):
+        _path = self.get_static(True).joinpath("paths.json")
 
         if obj:
             return _path

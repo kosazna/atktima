@@ -34,7 +34,7 @@ class SettingsTab(QWidget):
         self.setupUi(size)
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
-        self.popup = Popup(state['appname'])
+        self.popup = Popup()
 
         self.saveButton.subscribe(self.onSave)
         self.dbButton.subscribe(lambda: db.open_db(paths.get_db_exe()))
@@ -298,8 +298,8 @@ class SettingsTab(QWidget):
 
         self.popup.info("Οι ρυθμίσεις αποθηκεύτηκαν")
 
-    def updateJsonFile(self):
-        jsonfile = paths.get_static(True).joinpath("paths.json")
+    def   updateJsonFile(self):
+        jsonfile = paths.get_arcgis_paths()
         jsondata = load_json(jsonfile)
         username = state['username']
         kthmatemp = state['kthmatemp'][0]

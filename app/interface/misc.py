@@ -29,7 +29,7 @@ class MiscTab(QWidget):
         self.setupUi(size)
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
-        self.popup = Popup(state['appname'])
+        self.popup = Popup()
         self.buttonMakeForest.subscribe(self.onMakeForest)
         self.buttonMakeFolders.subscribe(self.onMakeFolders)
 

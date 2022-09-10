@@ -30,7 +30,7 @@ class OrganizeTab(QWidget):
         self.setupUi(size)
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
-        self.popup = Popup(state['appname'])
+        self.popup = Popup()
         self.buttonFilterTest.subscribe(self.onTestFilter)
         self.buttonPatternTest.subscribe(self.onTestPattern)
         self.buttonCopy.subscribe(self.onCopyPattern)

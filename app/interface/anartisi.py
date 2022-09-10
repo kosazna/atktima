@@ -29,7 +29,7 @@ class AnartisiTab(QWidget):
         self.setupUi(size)
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
-        self.popup = Popup(state['appname'])
+        self.popup = Popup()
         self.mapping.lineEdit.textChanged.connect(self.clearCombos)
         self.buttonAnartisi.subscribe(self.onAnartisi)
 

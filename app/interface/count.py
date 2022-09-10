@@ -31,7 +31,7 @@ class CountTab(QWidget):
         self.setupUi(size)
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
-        self.popup = Popup(state['appname'])
+        self.popup = Popup()
         self.missingShapes = []
         self.buttonCount.subscribe(self.countFiles)
         self.buttonMissing.subscribe(self.findMissingFiles)

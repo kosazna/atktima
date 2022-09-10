@@ -32,7 +32,7 @@ class ParadosiTab(QWidget):
         self.setupUi(size)
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
-        self.popup = Popup(state['appname'])
+        self.popup = Popup()
 
         self.makeAll.subscribe(self.onMakeAll)
         self.makeSpatial.subscribe(self.onMakeSpatial)

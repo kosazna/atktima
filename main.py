@@ -7,8 +7,8 @@ from at.logger import log
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QApplication
 
-from atktima.app import KtimaUI
 from atktima.app.settings import *
+from atktima.app.ui import KtimaUI
 
 if __name__ == "__main__":
 

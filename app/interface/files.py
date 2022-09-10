@@ -34,7 +34,7 @@ class FilesTab(QWidget):
 
         self.pickedMeleti = state['meleti']
         self.threadpool = QThreadPool(parent=self)
-        self.popup = Popup(state['appname'])
+        self.popup = Popup()
 
         self.filesCopied = False
 
