@@ -52,3 +52,11 @@ ORGANIZE_READ_SCHEMA = {"Ανακτήσεις": '<ota@10:14>',
 ORGANIZE_SAVE_SCHEMA = {"Ανά ΟΤΑ": '<ota>',
                         "ktima16 - Χωρικά": '<ota>/<shape>',
                         "ktima11 - Χωρικά": '<ota>/SHAPE/<shape>'}
+
+ALL_MELETES = ["KT1-05",
+               "KT2-02",
+               "KT2-11",
+               "KT5-14",
+               "KT5-16",
+               "KT5-17",
+               "KT5-22"]

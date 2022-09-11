@@ -13,6 +13,7 @@ from at.result import Result
 from at.io.utils import load_json, write_json
 from atktima.app.utils import db, paths, state, auth
 from atktima.app.core import create_mel_folder
+from atktima.app.settings import ALL_MELETES
 from PyQt5.QtCore import Qt, QThreadPool, pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
@@ -101,7 +102,7 @@ class SettingsTab(QWidget):
                                            parent=self)
         self.meletes = ComboInput(label="Μελέτη",
                                   combosize=(100, 24),
-                                  items=auth.get_categories(),
+                                  items=auth.get_categories() or ALL_MELETES,
                                   parent=self)
         self.lic = FileInput(label="Άδεια",
                              parent=self)
@@ -298,7 +299,7 @@ class SettingsTab(QWidget):
 
         self.popup.info("Οι ρυθμίσεις αποθηκεύτηκαν")
 
-    def   updateJsonFile(self):
+    def updateJsonFile(self):
         jsonfile = paths.get_arcgis_paths()
         jsondata = load_json(jsonfile)
         username = state['username']
